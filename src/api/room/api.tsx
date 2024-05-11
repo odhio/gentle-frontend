@@ -1,10 +1,10 @@
 import { LocalDataStream } from "@skyway-sdk/core";
 
-export const sendAudio=async(dataStream:LocalDataStream, userId:string, audioBlob:Blob)=>{
+export const sendAudio=async(dataStream:LocalDataStream, userId:string, messageId:string, audioBlob:Blob)=>{
   const formData = new FormData();
   formData.append("audio", audioBlob);
   
-  const res = await fetch("/api/audio/upload", {
+  const res = await fetch(`/api/audio/upload/${messageId}`, {
     method: "POST",
     body: formData,
   })
@@ -24,6 +24,7 @@ export const sendAudio=async(dataStream:LocalDataStream, userId:string, audioBlo
   return data
 }
 
+/* BEに移動
 export const announceRoomLeave = async (roomId: string) => {
   try {
     let messages = await getRoomMessages(roomId)
@@ -61,3 +62,4 @@ export const announceRoomLeave = async (roomId: string) => {
     return false
   }
 }
+*/
