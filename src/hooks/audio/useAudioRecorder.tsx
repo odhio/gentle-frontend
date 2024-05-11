@@ -6,10 +6,12 @@ import { SpeechMessage } from '@/types/DataModel';
 import { uuidV4 } from '@skyway-sdk/token';
 import { LoginUserContext } from '@/contexts/UserInfoContext';
 import { useParams, useSearchParams } from 'next/navigation';
+import { createMessage } from '@/api/db/message';
 interface Props {
   userId?: string | undefined;
   localStream: MediaStream;
   roomId: string;
+  loginUser: string;
 }
 
 export const useAudioRecorder = (props: Props) => {
@@ -56,8 +58,6 @@ export const useAudioRecorder = (props: Props) => {
     audioRecorder.onError = () => {}
 
     audioRecorder.onAnalysisEnd((data) => {
-      console.log('onAnalysisEnd:', data)
-
       if (dataStream !== undefined && data !== undefined) {
         dataStream.write({
           type: 'emotion',
@@ -75,14 +75,8 @@ export const useAudioRecorder = (props: Props) => {
 
       if (finalTranscript === '') return
       else {
-        const message = {
-          id: uuidV4(),
-          memberId: props.userId,
-          createdAt: Date.now(),
-          messageBody: finalTranscript,
-        } as SpeechMessage
-
-        const messagePK = await addMessageFB(roomId, message)
+        const message = finalTranscript
+        const messagePK = await createMessage(roomId, userId, message)
         if (messagePK !== null && messagePK !== undefined) {
           audioRecorder.stopRecording(messagePK)
           console.log('messagePK', messagePK)

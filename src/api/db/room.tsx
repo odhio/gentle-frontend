@@ -25,6 +25,7 @@ export const closeRoom = async (roomId: string) => {
     }
 }
 
+
 export const createRoom = async (roomId: string, roomName:string) => {
     const res = await fetch("/api/rooms/create",{
         method: "POST",
