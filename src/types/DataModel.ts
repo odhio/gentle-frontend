@@ -26,7 +26,7 @@ export interface SpeechMessage {
 export interface Room {
     id: string;
     sprint: string; // スプリントID, [...slug]でルーティングする形を想定しています。
-    members: string[];
+    members: string[]; // BE側ではRDBのため配列長分の行をもつ
     createdAt: number;
     closedAt: number;
     messages: SpeechMessage[]; //発話データ

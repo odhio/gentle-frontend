@@ -8,7 +8,7 @@ import { LocalAudioDisplay } from "./component/LocalAudioDisplay";
 import { RoomContext, useRoom } from "@/contexts/RoomContext";
 import { getCookie } from "cookies-next";
 import { createRoom, joinRoom, toggleRoomState } from "@/api/firebase/room";
-import { TransitionDialog } from "@/app/component/Dialog";
+import { TransitionDialog } from "@/app/_component/Dialog";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Box, Button, useColorModeValue, Alert, Flex, Grid, GridItem, Heading, Square, Text, Textarea } from "@chakra-ui/react";
 import { ChatIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
@@ -43,7 +43,7 @@ const getEmotionByPublicationId = (emotions: PopoverEmotions[], publicationId: s
     return emotions.find(emo => emo.member === publicationId);
   };
 
-export const MeetingRoom = ({pk}) => {
+export const MeetingRoom = ({params}) => {
     const [localStream, setLocalStream] = useState<MediaStream>();
     const { loginUser, setLoginUser } = useContext(LoginUserContext) || {};
 
@@ -54,12 +54,11 @@ export const MeetingRoom = ({pk}) => {
     const searchParams = useSearchParams();
     const roomId = searchParams.get("roomId");
     const customName = searchParams.get("name");
-    console.log(pk, roomId, customName);
-    
+
+
     const {dataStream, setDataStream } = useContext(RoomContext) || {};
     const [audioStream, setAudioStream] = useState<MediaStream>();
     const [videoStream, setVideoStream] = useState<MediaStream>();
-    const [FBRoomPK, setFBRoomPK] = useState<string>(); // 上記URLへのパラメータ移行ができればここは不要です
 
     // 入退室の遷移処理
     const router = useRouter();
@@ -83,10 +82,6 @@ export const MeetingRoom = ({pk}) => {
     const [me, setMe] = useState<LocalP2PRoomMember>();
     const [emotion, setEmotion] = useState<PopoverEmotions[]>([]);
     const [memberTranscript, setMemberTranscript] = useState<{ member: string, data: string }>();
-
-    useEffect(() => {
-
-    },[]);
 
     // カラーモードの設定
     const InputBoxBGColor = useColorModeValue('gray.200', 'blackAlpha.500');
@@ -144,13 +139,12 @@ export const MeetingRoom = ({pk}) => {
 
     // ルーム退室処理
     const onLeave = async () => {
-        console.log(room, me, pk);
-        
+        console.log(room, me, params);        
         if (me == null || room == null) return;
         try {
             if (room.members.length == 1) {
-                if(pk !== undefined)  await toggleRoomState(pk); // FIXME: 現在PK連携が切れてるのでここのSwitchが機能してません。ロジック自体は動作確認済みです。
-                const res = await announceRoomLeave(room.id);
+                if(roomId !== undefined) return;
+                await announceRoomLeave(roomId); // RoomPKに対してcreatedAtを更新して終了処理を要請する
                 if (res) {
                     for (const pub of me.publications) await me.unpublish(pub.id);
                     await me.leave();
@@ -184,27 +178,7 @@ export const MeetingRoom = ({pk}) => {
         setInputMessage("");
     }
 
-    const canJoin = useMemo(() => {
-        return roomName !== "" && audioStream != null && videoStream != null && me == null;
-    }, [roomName, audioStream, videoStream, me]);
-
-    // ルーム入室処理
-    const mediaInitialize = useCallback(async () => {
-        try {
-
-
-            console.log(audio, video);
-            
-
-
-            
-        } catch (error) {
-            console.error('Error accessing the camera:', error);
-        }
-    }, []);
-
     const onJoinChannel = useCallback(async () => {
-        if (token == null) return;
         if (roomId == undefined || token == undefined) return;
         const swCxt = await SkyWayContext.Create(token);
         
@@ -224,7 +198,7 @@ export const MeetingRoom = ({pk}) => {
             setAudioStream(audio); 
             setVideoStream(video);
 
-            onJoinChannel();　// ここ
+            const res = await onJoinChannel(memberId, roomId, sprintId);　// ルーム入室処理
 
             const me:LocalP2PRoomMember = await room.join({
                 name: loginUser?.name ?? "annonimus", // 全角はエラーになります
@@ -233,12 +207,7 @@ export const MeetingRoom = ({pk}) => {
             if (room !== undefined) {
                 setRoom(room);
                 setMe(me);
-
-                if (pk !== null && pk !== undefined) {
-                    await room.updateMetadata( customName?? "" );
-                    
-                    if(loginUser !== undefined && loginUser !== null ){await joinRoom(pk, loginUser.id)}
-                }
+                await joinRoom(roomId, loginUser.id)
             }
 
             // AudioStreamの配信
