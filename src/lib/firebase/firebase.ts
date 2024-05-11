@@ -6,8 +6,8 @@ import {
   FIREBASE_MESSAGING_SENDER_ID,
   FIREBASE_PROJECT_ID,
   FIREBASE_STORAGE_BUCKET,
-} from '../../constant/env';
-import { getDatabase } from 'firebase/database';
+} from '../../constant/env'
+import { getDatabase } from 'firebase/database'
 
 const firebaseConfig = {
   apiKey: FIREBASE_API_KEY,
@@ -20,6 +20,5 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 export const initializeFirebaseApp = () =>
-    !getApps().length ? initializeApp(firebaseConfig) : getApp()
+  !getApps().length ? initializeApp(firebaseConfig) : getApp()
 export const db = getDatabase()
-
