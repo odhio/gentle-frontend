@@ -5,8 +5,9 @@ import { RoomContext } from '@/contexts/RoomContext'
 import { LocalDataStream } from '@skyway-sdk/core'
 
 interface Props {
-  userId?: string | undefined
-  localStream: MediaStream
+    userId?: string | undefined;
+    localStream: MediaStream;
+    roomId: string;
 }
 
 export const LocalAudioDisplay = (props: Props) => {
