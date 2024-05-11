@@ -206,18 +206,17 @@ export const MeetingRoom = ({ params }) => {
             setAudioStream(audio); 
             setVideoStream(video);
 
-            const res = await onJoinChannel(memberId, roomId, sprintId);　// ルーム入室処理
+            //const res = await onJoinChannel(memberId, roomId, sprintId);　// ルーム入室処理
 
 
             const me: LocalP2PRoomMember = await room.join({
-
                 name: loginUser?.name ?? "annonimus", // 全角はエラーになります
             });
 
             if (room !== undefined) {
                 setRoom(room);
                 setMe(me);
-                await joinRoom(roomId, loginUser.id)
+               // await joinRoom(roomId, loginUser.id)
             }
 
             // AudioStreamの配信

@@ -14,9 +14,7 @@ export const getAllActiveRooms = async () => {
     onValue(roomRef, (snapshot) => {
       snapshot.forEach((childSnapshot) => {
         const data = childSnapshot.val();
-        if (data.active) {
-          resultArray.push({ id: childSnapshot.key, ...data }); // PKと本文のペアで取ってます
-        }
+        resultArray.push({ id: childSnapshot.key, ...data }); // PKと本文のペアで取ってます
       });
       resolve();
     });

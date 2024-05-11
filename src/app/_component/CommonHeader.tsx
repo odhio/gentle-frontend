@@ -60,10 +60,6 @@ export default function CommonHeader() {
               <Image w={180} src='/asset/logo_transparent.png' alt="" />
             </Link>
           </Box>
-          <Box>
-            {/*  */}
-            {roomCtx !== undefined && roomCtx !== null ? `${roomCtx?.name}(${roomCtx.id})` : '参加を待っています'}
-          </Box>
           <Flex alignItems={'center'}>
             <Stack direction={'row'} spacing={3}>
               <Button onClick={showAnnouce}>{<FaRegBell />}</Button>

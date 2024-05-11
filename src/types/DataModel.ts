@@ -2,13 +2,11 @@
 export interface UserInformation {
     id: string;
     name: string;
-    joined?: string[];　// デイリースクラム
+    joined?: string[];
     image?: string;
 }
 
 
-// NOTE: 分析にまわす際のデータ整形がややこしくなりそうなので、ネスト構造をやめます
-// ラベルのヒントとしてexportを外し、メモ的に置いておきます
 export interface EmotionLabel {    
         result: string,   // happy, sad, anger, disgust, fear, neutral
         pressure: string, // low, medium, high
@@ -23,22 +21,30 @@ export interface SpeechMessage {
     pressure?: string;
 }
 
-export interface Sprints {
+// 会議開始画面に表示するデータ群
+// Milestone (parent)
+export interface Milestone{
     id: string;
-    name: string; // スプリント名
+    name: string; // 目標
+    description: string; // 目標設定
     createdAt: number;
     closedAt: number;
-}
-
-export interface Room {
-    id: string;
-    sprint: string; // スプリントID, [...slug]でルーティングする形を想定しています。
-    members: string[]; // BE側ではRDBのため配列長分の行をもつ
-    createdAt: number;
-    closedAt: number;
-    messages: SpeechMessage[]; //発話データ
     summary?: string; // 要約
 }
+
+// DaylyScrum (child)
+export interface DaylyScrum {
+    id: string;
+    scrum: string;
+    name?: string; // タスク名
+    createdAt: number;
+    closedAt: number;
+    members: string[];
+    summary?: string; // 要約
+    emotion?: EmotionLabel
+}
+
+
 
 // DataStream(FE)関係
 export interface ChatMessage {

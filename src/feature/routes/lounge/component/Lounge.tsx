@@ -1,20 +1,31 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createRoom, getAllActiveRooms, joinRoom } from '@/api/firebase/room';
-import { Box, Button, Card, CardBody, CardFooter, CardHeader, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, SimpleGrid, Text, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, CardFooter, CardHeader, Flex, HStack, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, SimpleGrid, Text, useDisclosure } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { uuidV4 } from '@skyway-sdk/token';
+import { Scrum, Sprints } from '@/types/DataModel';
 
-export const LoungeRoom = () => {
+export const LoungeRoom = (/*{params}: {params: any}*/) => {
   const [activeRooms, setActiveRooms] = useState<any[]>([]);
   const [roomName, setRoomName] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
+  const [scrumData, setScrumData] = useState<Scrum>({}); // スクラム詳細
+  const [sprintData, setSprintData] = useState<Sprints[]>([]); // スプリント詳細
+
+
+  useEffect(() => {
+    const fetchScrumData = async () => {
+      const { scrumData } = await fetchScrumData();
+    }
+  }, []);
+  //const { slug } = params;
 
   // 開催中の部屋一覧
   useEffect(() => {
     const fetchActiveRooms = async () => {
-      setActiveRooms(await getAllActiveRooms());
+      setSprintData(await getAllActiveRooms()); // スプリントの部屋一覧を取得
     };
     fetchActiveRooms();
   }, []);
@@ -24,31 +35,57 @@ export const LoungeRoom = () => {
     const pk = await createRoom(uuid, roomName);
     if (pk) {
       router.push(`/room/${pk}?roomId=${uuid}&name=${roomName}`);
-    }else{
+    } else {
       alert('作成中にエラーが発生しました。');
     }
   };
-  
-  
+
+
   return (
+
     <div>
       <Box display="flex" justifyContent="center" flexDirection={'column'} gap={3} alignItems="center">
-      <Heading textAlign={'center'} size={'xl'}>開催中のルーム一覧</Heading>
-      <Button mx={'auto'} h={'60px'} w={'10%'} onClick={onOpen}>新規作成</Button>
+
+        <Heading textAlign={'center'} mt={5} size={'xl'}>{scrumData.name ?? "ここにスクラム名"}</Heading>
+        <Button mx={'auto'} h={'60px'} w={'fit-content'} px={'15px'} onClick={onOpen}>今日の会議を始める</Button>
       </Box>
-      <SimpleGrid mx={50} mt={10} columns={[1, 2, 3]} spacing={4}>
-        {activeRooms && activeRooms.map((room) => (
-          <Card key={room.id}>
+      <SimpleGrid mx={50} mt={10} columns={[1, 2, 3,4,5,6,7]} spacing={4}>
+        {sprintData && sprintData.map((sprint) => (
+          <Card
+            bg={sprint?.createdAt ? 'gray.100' : 'white'}
+            opacity={sprint?.createdAt ? 0.5 : 1}
+            p={4}  // Padding inside the Box
+            borderRadius="md"  // Rounded corners
+            transition="background 0.3s, opacity 0.3s"  // Smooth transition 
+            key={sprint.id} >
             <CardHeader>
-              <Heading size='md'>
-                {room.name || `Room ${room.id}`}
+              <Heading size='md' mb={3} display={'inline-block'}>
+                {sprint.createdAt ? "yyyy/mm/dd HH:MM" : "yyyy/mm/dd HH:MM"} {/*仮置き*/}
               </Heading>
+              <Text>
+                参加者
+                {sprint?.members?.length > 0 ? (
+                  sprint.members.join(', ')
+                ) : (
+                  "xxxxxxxxx"
+                )}
+              </Text>
             </CardHeader>
             <CardBody>
-              <Text>Room ID: {room.roomId}</Text>
+
+              <Text>{sprint.summary ? ("xxxxxxxxxについて話し合われました") : ("")}</Text>
             </CardBody>
             <CardFooter>
-              <Button as="a" href={`/room/${room.id}?roomId=${room.roomId}`}>参加する</Button>
+              {sprint.closedAt  ? (
+                <>{/*TODO:仮置き状態 */}</>
+              ) : (
+                <HStack spacing={4}>
+                  <Text>今日の会議を始めましょう</Text>
+                  <Button as="a" href={`/room/${sprintData?.id}?roomId=${sprintData?.roomId}`}>
+                    参加
+                  </Button>
+                </HStack>
+              )}
             </CardFooter>
           </Card>
         ))}
@@ -61,9 +98,9 @@ export const LoungeRoom = () => {
           <ModalCloseButton />
           <ModalBody>
             <Input
-              placeholder="部屋名を入力してください" 
-              value={roomName} 
-              onChange={(e) => setRoomName(e.target.value)} 
+              placeholder=""
+              value={roomName}
+              onChange={(e) => setRoomName(e.target.value)}
             />
           </ModalBody>
           <ModalFooter>
