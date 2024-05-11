@@ -1,13 +1,6 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  Dispatch,
-  SetStateAction,
-} from 'react'
-import { LocalDataStream } from '@skyway-sdk/core'
-import { set } from 'firebase/database'
-import { Room } from '@skyway-sdk/room'
+import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
+import { LocalDataStream } from '@skyway-sdk/core';
+import { Room } from '@skyway-sdk/room';
 
 interface RoomMetaInfo {
   roomName?: string

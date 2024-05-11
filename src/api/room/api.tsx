@@ -1,22 +1,13 @@
-import { LocalDataStream } from '@skyway-sdk/core'
-import {
-  addRoomSummary,
-  getRoomMessages,
-  pushChatMessageEmotion,
-} from '../firebase/room'
-import { API_URL } from '@/config/env'
+import { API_URL } from "@/config/env";
+import { LocalDataStream } from "@skyway-sdk/core";
 
-export const sendAudio = async (
-  dataStream: LocalDataStream,
-  userId: string,
-  audioBlob: Blob,
-) => {
-  const formData = new FormData()
-  formData.append('audio', audioBlob)
+export const sendAudio=async(dataStream:LocalDataStream, userId:string, audioBlob:Blob)=>{
+  const formData = new FormData();
+  formData.append("audio", audioBlob);
 
-  const res = await fetch(API_URL + '/api/audio/upload', {
+  const res = await fetch(API_URL + "/api/audio/upload", {
     credentials: 'include',
-    method: 'POST',
+    method: "POST",
     body: formData,
   })
   const data = res.json()
@@ -55,9 +46,9 @@ export const announceRoomLeave = async (roomId: string) => {
     ${message.message_body}
     `
     })
-    const res = await fetch(API_URL + '/api/generate', {
-      method: 'POST',
+    const res = await fetch(API_URL + "/api/generate", {
       credentials: 'include',
+      method: "POST",
       headers: {
         'Content-Type': 'application/json',
       },
