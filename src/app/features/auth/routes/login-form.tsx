@@ -17,7 +17,6 @@ import { useCallback } from 'react'
 import { login } from '../api/login'
 import { useRouter } from 'next/navigation'
 
-
 type LoginFormData = {
   id: string
 }
@@ -54,7 +53,6 @@ export const LoginForm = () => {
       reset()
     }
   }, [])
-
 
   return (
     <Flex

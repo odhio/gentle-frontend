@@ -21,7 +21,6 @@ import { useCallback } from 'react'
 import { signUp } from '../api/sign-up'
 import { useRouter } from 'next/navigation'
 
-
 const Images = [
   '/asset/userassets/icon001.jpg',
   '/asset/userassets/icon002.jpg',
