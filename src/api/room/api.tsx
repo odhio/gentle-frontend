@@ -13,13 +13,12 @@ export const sendAudio=async(dataStream:LocalDataStream, userId:string, messageI
   })
   const data = res.json()
   if (dataStream !== undefined) {
-    const writeBody = async (sendAudioResult) => {
-      const result = await sendAudioResult
+    const writeBody = async (emotion) => {
       dataStream.write({
         type: 'emotion',
         member_id: userId,
-        emotion: result['result'],
-        pressure: result['pressure'],
+        emotion: emotion['result'],
+        pressure: emotion['pressure'],
       })
     }
     writeBody(data)

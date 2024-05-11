@@ -5,20 +5,18 @@ import { SkyWayAuthToken, nowInSec, uuidV4 } from "@skyway-sdk/token";
 
 import React, { ChangeEvent, createElement, use, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react"
 
-import { announceRoomLeave } from "@/api/room/api";
 import { LocalAudioDisplay } from "./component/LocalAudioDisplay";
 import { RoomContext, useRoom } from "@/contexts/RoomContext";
-import { getCookie } from "cookies-next";
 import { createRoom, joinRoom, toggleRoomState } from "@/api/firebase/room";
 import { TransitionDialog } from "@/app/_component/Dialog";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Box, Button, useColorModeValue, Alert, Flex, Grid, GridItem, Heading, Square, Text, Textarea } from "@chakra-ui/react";
 import { ChatIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
-import { get } from "http";
 import { LoginUserContext } from "@/contexts/UserInfoContext";
 import { EmotionRenderer } from "./component/emotion/EmotionRenderer";
 import { ChatSpace } from "./component/datastream/ChatSpace";
 import { ChatMessage } from "@/types/DataModel";
+import { closeRoom } from "@/api/db/room";
 
 interface RemoteMediaArea {
     [key: string]: HTMLElement;
@@ -67,7 +65,16 @@ export const MeetingRoom = ({ params }) => {
     const localAudioRef = useRef<HTMLAudioElement>(null);
 
     // ルームインフォメーションメッセージ
-    const [information, setInformation] = useState<string>('');
+    const [information, setInformation] = useState<string>();
+
+    useEffect(() => {
+        if (information !== '') {
+          const timer = setTimeout(() => {
+            setInformation(undefined);
+          }, 3000);
+        return () => clearTimeout(timer);
+        }
+      }, [information]);
 
     // チャットメッセージ等の管理
     const [inputMessage, setInputMessage] = useState<string>("");
@@ -143,16 +150,13 @@ export const MeetingRoom = ({ params }) => {
         try {
             if (room.members.length == 1) {
                 if (roomId == undefined) return;
-                await announceRoomLeave(roomId);
+                await closeRoom(roomId);
                 for (const pub of me.publications) await me.unpublish(pub.id);
                 await me.leave();
                 setRoom(undefined);
                 setMe(undefined);
-
             } else {
-
                 console.log("Failed to announce room leave");
-
             }
             for (const pub of me.publications) {
                 await me.unpublish(pub.id)
@@ -171,10 +175,8 @@ export const MeetingRoom = ({ params }) => {
     const sendMessage = () => {
         if (dataStream == (null || undefined)) return;
         if (inputMessage == "") return;
-        setOutputTextChat(prev => [...prev, { memberId: me?.id ?? "名無し", memberName: me?.metadata?.name ?? "", message: inputMessage } as ChatMessage]);
-
-        dataStream.write({ memberId: me?.id ?? "", memberName: me?.metadata?.name ?? "名無し", type: "text", message: inputMessage });
-
+        setOutputTextChat(prev => [...prev, { memberId: me?.id , memberName: loginUser?.name ?? "名無し", message: inputMessage } as ChatMessage]);
+        dataStream.write({ memberId: me?.id ?? "", memberName: loginUser?.name ?? "名無し", type: "text", message: inputMessage });
         setInputMessage("");
     }
 
@@ -192,22 +194,17 @@ export const MeetingRoom = ({ params }) => {
 
             if (video == undefined || audio == undefined) {
                 alert("デバイスアクセスを拒否したか正常に取得できませんでした。ルーム選択画面に戻ります");
-
                 router.push('/lounge'); return;
             };
             setIsMediaAuthed(true);
-
             setAudioStream(audio); 
             setVideoStream(video);
 
-            //const res = await onJoinChannel(memberId, roomId, sprintId);　// ルーム入室処理
-
-
             const me: LocalP2PRoomMember = await room.join({
-                name: loginUser?.name ?? uuidV4(), // 全角はエラーになります
+                name: loginUser?.id
             });
 
-            if (room !== undefined) {
+            if (room !== undefined && me !== undefined && roomId !== undefined) {
                 setRoom(room);
                 setMe(me);
                 await joinRoom(roomId, loginUser.id)
@@ -215,8 +212,6 @@ export const MeetingRoom = ({ params }) => {
 
             // AudioStreamの配信
             const SkyWayDataStream = await SkyWayStreamFactory.createDataStream();
-            console.log(audioStream, videoStream);
-
 
             if (setDataStream !== undefined && SkyWayDataStream !== undefined) setDataStream(SkyWayDataStream);
 
@@ -279,10 +274,12 @@ export const MeetingRoom = ({ params }) => {
             };
             room.publications.forEach(subscribeAndAttach);
             room.onStreamPublished.add((e) => subscribeAndAttach(e.publication));
+            
             // メンバーが入室した際の処理
             room.onMemberJoined.once((e) => {
-                setInformation(`User ${e.member.id} さんが入室しました.`);
+                setInformation(`メンバーが入室しました.`);
             });
+            
             // メンバーが退室した際の処理
             room.onMemberLeft.add((e) => {
                 room.publications.forEach(async (publication) => {
@@ -290,7 +287,7 @@ export const MeetingRoom = ({ params }) => {
                 });
                 const displayArea = document.querySelector(`[data-publication-id="${e.member.id}"]`);
                 if (displayArea !== undefined && displayArea !== null) displayArea.remove();
-                setInformation(`User ${e.member.id} さんが退室しました.`);
+                setInformation(`メンバーが退室しました.`);
             })
         };
     }, [roomName, token, localStream]);
@@ -425,7 +422,7 @@ export const MeetingRoom = ({ params }) => {
                                         <div>
                                             {
                                                 (audioStream !== undefined && dataStream !== undefined) ? (
-                                                    <LocalAudioDisplay userId={me?.id} localStream={audioStream} />
+                                                    <LocalAudioDisplay roomId={roomId} userId={me?.id} localStream={audioStream} />
                                                 ) : (<></>)
                                             }
                                         </div>
