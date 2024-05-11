@@ -7,7 +7,7 @@ import '@/styles/global.css';
 import { LoginUserProvider } from "@/contexts/UserInfoContext";
 import '@/app/room/styles/global.css';
 
-export default function Room({ params }:{params: {slug: string}}) {
+export default function Room({ params }:{params: {slug: ['sprints','roomId']}}) {
   return (
     <RoomProvider>
       <Layout>

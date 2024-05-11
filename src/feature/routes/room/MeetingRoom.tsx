@@ -191,27 +191,20 @@ export const MeetingRoom = ({pk}) => {
     // ルーム入室処理
     const mediaInitialize = useCallback(async () => {
         try {
-            if (token == null) return;
-            // NOTE: BEへ接続するデータを音声に限定するため分けてます。ビデオデータが送られると音声ストリームを処理できずエラーになります。
-            // ユーザビリティが悪いので一回の承認で済むように改善できないか検討中です。
-            const video = await navigator.mediaDevices.getUserMedia({ video: true });
-            const audio = await navigator.mediaDevices.getUserMedia({ audio: true });
-            if (video == undefined || audio == undefined) { 
-                alert ("デバイスアクセスを拒否したか正常に取得できませんでした。ルーム選択画面に戻ります");
-                router.push('/lounge'); return;
-            };
+
+
             console.log(audio, video);
             
-            setAudioStream(audio);
-            setVideoStream(video);
 
-            onJoinChannel();
+
+            
         } catch (error) {
             console.error('Error accessing the camera:', error);
         }
     }, []);
 
     const onJoinChannel = useCallback(async () => {
+        if (token == null) return;
         if (roomId == undefined || token == undefined) return;
         const swCxt = await SkyWayContext.Create(token);
         
@@ -220,8 +213,19 @@ export const MeetingRoom = ({pk}) => {
                 type: 'p2p',
                 name: roomId,
             });
+            const video = await navigator.mediaDevices.getUserMedia({ video: true });
+            const audio = await navigator.mediaDevices.getUserMedia({ audio: true });
+            if (video == undefined || audio == undefined) { 
+                alert ("デバイスアクセスを拒否したか正常に取得できませんでした。ルーム選択画面に戻ります");
+                router.push('/lounge'); return;
+            };
 
-            // TODO: クライアントサイドでのログインユーザ情報の受け渡し方法を見直しています。
+            // このスコープでは更新されないためこのスコープ内では上記のストリームを使う
+            setAudioStream(audio); 
+            setVideoStream(video);
+
+            onJoinChannel();　// ここ
+
             const me:LocalP2PRoomMember = await room.join({
                 name: loginUser?.name ?? "annonimus", // 全角はエラーになります
             });
@@ -333,7 +337,7 @@ useEffect(() => {
 
 // ルーム入室時の処理
 const handler = {
-    onYes: mediaInitialize,
+    onYes: onJoinChannel,
     // デバイスアクセスを拒否した場合ルーム選択画面に戻す
     onCancel: (() => router.push('/lounge'))
 }

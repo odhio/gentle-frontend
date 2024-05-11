@@ -32,7 +32,6 @@ interface Props {
 }
 
 export default function CommonHeader() {
-  const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {roomCtx, setRoomMetaInfo} = useContext(RoomContext) || {};
   const { setLoginUser } = useContext(LoginUserContext)
@@ -67,15 +66,11 @@ export default function CommonHeader() {
           </Box>
           <Flex alignItems={'center'}>
             <Stack direction={'row'} spacing={3}>
-              <Button onClick={toggleColorMode}>
-                {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-              </Button>
               <Button onClick={showAnnouce}>{<FaRegBell />}</Button>
               {
                 userInfo ? (
                   <Menu>
                     <MenuButton
-                      as={Button}
                       rounded={'full'}
                       variant={'link'}
                       cursor={'pointer'}

@@ -2,7 +2,7 @@
 export interface UserInformation {
     id: string;
     name: string;
-    joined?: string[];
+    joined?: string[];　// デイリースクラム
     image?: string;
 }
 
@@ -14,31 +14,24 @@ export interface EmotionLabel {
         pressure: string, // low, medium, high
 }
 
-// データベース構成関係
 export interface SpeechMessage {
     id: string;
     memberId: string;
     createdAt: number;
     messageBody: string;
-    emotionLabel?: string; // 推論完了後に追加
+    emotionLabel?: string;
     pressure?: string;
 }
 
 export interface Room {
-    active: boolean;
-    members: string[]; // MemberID[]
+    id: string;
+    sprint: string; // スプリントID, [...slug]でルーティングする形を想定しています。
+    members: string[];
     createdAt: number;
     closedAt: number;
-    messages: SpeachMessage[];
-    summary?: string;
+    messages: SpeechMessage[]; //発話データ
+    summary?: string; // 要約
 }
-
-/* TODO: ここは要件に応じて拡張する方向で考えております
-export interface MeetingResult {
-    roomId: string;
-    summary: string;
-}
-*/
 
 // DataStream(FE)関係
 export interface ChatMessage {
