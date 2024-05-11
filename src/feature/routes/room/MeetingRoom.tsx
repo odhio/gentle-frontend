@@ -2,7 +2,9 @@
 
 import { LocalAudioStream, LocalDataStream, LocalP2PRoomMember, LocalRoomMember, LocalStream, LocalVideoStream, P2PRoom, RemoteAudioStream, RemoteDataStream, RemoteVideoStream, RoomPublication, SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from "@skyway-sdk/room";
 import { SkyWayAuthToken, nowInSec, uuidV4 } from "@skyway-sdk/token";
+
 import React, { ChangeEvent, createElement, use, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react"
+
 import { announceRoomLeave } from "@/api/room/api";
 import { LocalAudioDisplay } from "./component/LocalAudioDisplay";
 import { RoomContext, useRoom } from "@/contexts/RoomContext";
@@ -34,6 +36,7 @@ interface UserRenderArea {
 }
 
 export interface PopoverEmotions {
+
     member: string;
     emotion: string;
     pressure: string;
@@ -41,6 +44,7 @@ export interface PopoverEmotions {
 
 const getEmotionByPublicationId = (emotions: PopoverEmotions[], publicationId: string): PopoverEmotions | undefined => {
     return emotions.find(emo => emo.member === publicationId);
+
 };
 
 export const MeetingRoom = ({ params }) => {
@@ -51,7 +55,9 @@ export const MeetingRoom = ({ params }) => {
     const roomId = searchParams.get("roomId");
     const customName = searchParams.get("name");
 
+
     const { dataStream, setDataStream } = useContext(RoomContext) || {};
+
     const [audioStream, setAudioStream] = useState<MediaStream>();
     const [videoStream, setVideoStream] = useState<MediaStream>();
 
@@ -70,8 +76,8 @@ export const MeetingRoom = ({ params }) => {
     const [inputMessage, setInputMessage] = useState<string>("");
     const [outputTextChat, setOutputTextChat] = useState<ChatMessage[]>([]);
 
-    // ルーム名とユーザの情報 
     const [userAreaDocuments, setUserAreaDocuments] = useState<HTMLElement[]>([]);
+
     const [roomName, setRoomName] = useState<string>();
     const [room, setRoom] = useState<P2PRoom>();
     const [me, setMe] = useState<LocalP2PRoomMember>();
@@ -134,6 +140,7 @@ export const MeetingRoom = ({ params }) => {
 
     // ルーム退室処理
     const onLeave = async () => {
+
         console.log(room, me, params);
         if (me == null || room == null) return;
         try {
@@ -160,6 +167,7 @@ export const MeetingRoom = ({ params }) => {
             console.error(e);
         } finally {
             if (roomId !== (undefined || null)) await announceRoomLeave(roomId); //
+
             router.push('/lounge');
         }
     }
@@ -169,7 +177,9 @@ export const MeetingRoom = ({ params }) => {
         if (dataStream == (null || undefined)) return;
         if (inputMessage == "") return;
         setOutputTextChat(prev => [...prev, { memberId: me?.id ?? "名無し", memberName: me?.metadata?.name ?? "", message: inputMessage } as ChatMessage]);
+
         dataStream.write({ memberId: me?.id ?? "", memberName: me?.metadata?.name ?? "名無し", type: "text", message: inputMessage });
+
         setInputMessage("");
     }
 
@@ -184,18 +194,23 @@ export const MeetingRoom = ({ params }) => {
             });
             const video = await navigator.mediaDevices.getUserMedia({ video: true });
             const audio = await navigator.mediaDevices.getUserMedia({ audio: true });
+
             if (video == undefined || audio == undefined) {
                 alert("デバイスアクセスを拒否したか正常に取得できませんでした。ルーム選択画面に戻ります");
+
                 router.push('/lounge'); return;
             };
 
             // このスコープでは更新されないためこのスコープ内では上記のストリームを使う
-            setAudioStream(audio);
+
+            setAudioStream(audio); 
             setVideoStream(video);
 
             const res = await onJoinChannel(memberId, roomId, sprintId);　// ルーム入室処理
 
+
             const me: LocalP2PRoomMember = await room.join({
+
                 name: loginUser?.name ?? "annonimus", // 全角はエラーになります
             });
 
@@ -209,12 +224,14 @@ export const MeetingRoom = ({ params }) => {
             const SkyWayDataStream = await SkyWayStreamFactory.createDataStream();
             console.log(audioStream, videoStream);
 
+
             if (setDataStream !== undefined && SkyWayDataStream !== undefined) setDataStream(SkyWayDataStream);
 
             const myVideoInputStream = new LocalVideoStream(video.getVideoTracks()[0]);
             const myAudioqInputStream = new LocalAudioStream(audio.getAudioTracks()[0]);
             if (audio) await me.publish(myAudioqInputStream);
             if (video) await me.publish(myVideoInputStream);
+
             await me.publish(SkyWayDataStream);
 
             const subscribeAndAttach = async (publication: RoomPublication) => {
@@ -495,4 +512,5 @@ export const MeetingRoom = ({ params }) => {
             )}
         </>
     );
+
 }
