@@ -9,10 +9,14 @@ import {
   FormControl,
   FormLabel,
   FormErrorMessage,
+  useToast,
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { useForm } from 'react-hook-form'
 import { useCallback } from 'react'
+import { login } from '../api/login'
+import { useRouter } from 'next/navigation'
+
 
 type LoginFormData = {
   id: string
@@ -22,12 +26,36 @@ export const LoginForm = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { isValid, isSubmitting, errors },
   } = useForm<LoginFormData>()
 
-  const onSubmit = useCallback((data: LoginFormData) => {
-    console.log(data)
+  const router = useRouter()
+  const toast = useToast()
+
+  const onSubmit = useCallback(async (data: LoginFormData) => {
+    try {
+      const response = await login(data)
+      if (response.success) {
+        toast({
+          description: 'ログインしました',
+          status: 'success',
+        })
+        router.push('/')
+      } else {
+        throw new Error('Login failed')
+      }
+    } catch (error) {
+      toast({
+        description: 'ログインに失敗しました',
+        status: 'error',
+      })
+    } finally {
+      reset()
+    }
   }, [])
+
+
   return (
     <Flex
       direction="column"
