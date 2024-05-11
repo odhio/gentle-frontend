@@ -6,6 +6,9 @@ import {
   Input,
   Link,
   Text,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { useForm } from 'react-hook-form'
@@ -19,26 +22,44 @@ export const LoginForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { isValid, isSubmitting },
+    formState: { isValid, isSubmitting, errors },
   } = useForm<LoginFormData>()
 
   const onSubmit = useCallback((data: LoginFormData) => {
     console.log(data)
   }, [])
   return (
-    <Flex direction="column" background={'gray.100'} padding={12} rounded={6} gap={6} maxW={'400px'} w={'100%'}>
+    <Flex
+      direction="column"
+      background={'gray.100'}
+      padding={12}
+      rounded={6}
+      gap={6}
+      maxW={'400px'}
+      w={'100%'}
+    >
       <Heading color={'gray.700'} fontSize={'xl'}>
         参加者名
       </Heading>
-      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-        <Input
-          {...register('id', { required: true })}
-          background={'gray.50'}
-          placeholder="ユーザ名またはメールアドレスを入力してください"
-          variant="filled"
-          type="text"
-        />
-        <Button type="submit" mb={4} colorScheme="teal" disabled={!isValid || isSubmitting} isLoading={isSubmitting}>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <FormControl isInvalid={!!errors.id}>
+          <FormLabel>ID</FormLabel>
+          <Input
+            {...register('id', { required: 'IDを入力してください' })}
+            background={'gray.50'}
+            placeholder="ユーザ名またはメールアドレスを入力してください"
+            variant="filled"
+            type="text"
+          />
+          <FormErrorMessage>{errors.id?.message}</FormErrorMessage>
+        </FormControl>
+        <Button
+          type="submit"
+          mb={4}
+          colorScheme="teal"
+          disabled={!isValid || isSubmitting}
+          isLoading={isSubmitting}
+        >
           ログイン
         </Button>
       </form>
