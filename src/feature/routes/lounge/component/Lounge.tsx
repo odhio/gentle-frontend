@@ -5,6 +5,7 @@ import { Box, Button, Card, CardBody, CardFooter, CardHeader, Flex, HStack, Head
 import { useRouter } from 'next/navigation';
 import { uuidV4 } from '@skyway-sdk/token';
 import { Scrum, Sprints } from '@/types/DataModel';
+import { Image } from '@chakra-ui/next-js';
 
 export const LoungeRoom = (/*{params}: {params: any}*/) => {
   const [activeRooms, setActiveRooms] = useState<any[]>([]);
@@ -92,25 +93,34 @@ export const LoungeRoom = (/*{params}: {params: any}*/) => {
       </SimpleGrid>
 
       <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>ルームを作成する</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Input
-              placeholder=""
-              value={roomName}
-              onChange={(e) => setRoomName(e.target.value)}
+      <ModalOverlay />
+      <ModalContent bg="orange.50" borderRadius="lg">
+        <ModalHeader>今日の会議を始める</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Box textAlign="center" mb={4}>
+            <Text fontSize="lg" color="orange.700">
+              会議の詳細
+            </Text>
+            <Image
+              src=""
+              alt="Meeting Placeholder"
+              borderRadius="md"
+              boxShadow="sm"
+              mt={2}
             />
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" onClick={handleCreateRoom}>
-              新規作成
-            </Button>
-            <Button variant="ghost" onClick={onClose}>キャンセル</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </Box>
+        </ModalBody>
+        <ModalFooter>
+          <Button colorScheme="blue" mr={3} onClick={handleCreateRoom}>
+            新規作成
+          </Button>
+          <Button variant="outline" onClick={onClose}>
+            キャンセル
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
     </div>
   );
 };

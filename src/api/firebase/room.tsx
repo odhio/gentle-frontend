@@ -4,8 +4,7 @@ import { EmotionLabel, Room, SpeachMessage} from '@/types/DataModel';
 import { equalTo, orderByChild, get, push, query, ref, orderByKey, update, onChildAdded, onValue } from 'firebase/database';
 import { resolve } from 'path';
 
-/* FIXME: if(!data.active)にすれば終了した会議のみ取得可能です。
-active=false && result !==undefined で閉室済みの結果一覧をオブジェクト配列で受け取るような形で転用できるのではとおもってます */
+
 export const getAllActiveRooms = async () => {
   const roomRef = ref(db, 'rooms/');
   let resultArray = [];
@@ -14,7 +13,7 @@ export const getAllActiveRooms = async () => {
     onValue(roomRef, (snapshot) => {
       snapshot.forEach((childSnapshot) => {
         const data = childSnapshot.val();
-        resultArray.push({ id: childSnapshot.key, ...data }); // PKと本文のペアで取ってます
+        resultArray.push({ id: childSnapshot.key, ...data });
       });
       resolve();
     });
