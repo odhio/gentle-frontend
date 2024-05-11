@@ -33,9 +33,8 @@ export interface Milestone{
 }
 
 // DaylyScrum (child)
-export interface DaylyScrum {
+export interface Rooms {
     id: string;
-    scrum: string;
     name?: string; // タスク名
     createdAt: number;
     closedAt: number;

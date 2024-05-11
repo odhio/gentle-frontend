@@ -46,7 +46,6 @@ export class AudioRecorder {
         this.stream = stream;
         this._audioChunks = [];
         this._audioBlob = null;
-         // { mimeType: 'audio/webm'}で明示可能
         this._eventEmitter = new EventEmitter();
         this._eventHandlers();
         this.onError = () => {};
@@ -60,7 +59,6 @@ export class AudioRecorder {
     startRecording() {
         this._audioBlob = null;
         this._audioChunks = [];
-        console.log("startRecording");
         this.state = 'recording';
         this._mediaRecorder = new MediaRecorder(this._audioStream, { mimeType: 'audio/webm' });
         

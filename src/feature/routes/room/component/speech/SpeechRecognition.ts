@@ -18,7 +18,6 @@ export class SpeechRecognitionComponent {
       this.start();
     };
     this.recognition.onstart = () => {
-      console.log("recognition started");
       if (restarter) {
         restarter();
       }

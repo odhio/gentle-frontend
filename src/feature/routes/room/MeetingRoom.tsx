@@ -146,7 +146,7 @@ export const MeetingRoom = ({ params }) => {
         try {
             if (room.members.length == 1) {
                 if (roomId == undefined) return;
-                await announceRoomLeave(roomId); // RoomPKを指定して終了処理を要請する
+                await announceRoomLeave(roomId);
                 for (const pub of me.publications) await me.unpublish(pub.id);
                 await me.leave();
                 setRoom(undefined);
@@ -166,8 +166,6 @@ export const MeetingRoom = ({ params }) => {
         } catch (e) {
             console.error(e);
         } finally {
-            if (roomId !== (undefined || null)) await announceRoomLeave(roomId); //
-
             router.push('/lounge');
         }
     }
@@ -200,8 +198,7 @@ export const MeetingRoom = ({ params }) => {
 
                 router.push('/lounge'); return;
             };
-
-            // このスコープでは更新されないためこのスコープ内では上記のストリームを使う
+            setIsMediaAuthed(true);
 
             setAudioStream(audio); 
             setVideoStream(video);
@@ -210,7 +207,7 @@ export const MeetingRoom = ({ params }) => {
 
 
             const me: LocalP2PRoomMember = await room.join({
-                name: loginUser?.name ?? "annonimus", // 全角はエラーになります
+                name: loginUser?.name ?? uuidV4(), // 全角はエラーになります
             });
 
             if (room !== undefined) {

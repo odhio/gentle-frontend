@@ -1,11 +1,7 @@
 import { LocalDataStream } from "@skyway-sdk/core";
 import { addRoomSummary, getRoomMessages, pushChatMessageEmotion } from "../firebase/room";
 
-const userId = "user1";
-
-export const sendAudio=async(dataStream:LocalDataStream, userId:string, audioBlob)=>{
-  console.log("sendAudio:",dataStream);
-  
+export const sendAudio=async(dataStream:LocalDataStream, userId:string, audioBlob:Blob)=>{
   const formData = new FormData();
   formData.append("audio", audioBlob);
   
@@ -18,7 +14,6 @@ export const sendAudio=async(dataStream:LocalDataStream, userId:string, audioBlo
   const writeBody = async (sendAudioResult) => {
     const result = await sendAudioResult;
     dataStream.write({type:"emotion", member_id: userId, emotion: result["result"], "pressure": result["pressure"]});
-    console.log("emotion sended");
   };
     writeBody(data);
   }

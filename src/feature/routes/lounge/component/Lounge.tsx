@@ -1,35 +1,30 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createRoom, getAllActiveRooms, joinRoom } from '@/api/firebase/room';
+import { createRoom, getAllActiveRooms } from '@/api/firebase/room';
 import { Box, Button, Card, CardBody, CardFooter, CardHeader, Flex, HStack, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, SimpleGrid, Text, useDisclosure } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { uuidV4 } from '@skyway-sdk/token';
-import { Scrum, Sprints } from '@/types/DataModel';
+import { Rooms } from '@/types/DataModel';
 import { Image } from '@chakra-ui/next-js';
 
 export const LoungeRoom = (/*{params}: {params: any}*/) => {
-  const [activeRooms, setActiveRooms] = useState<any[]>([]);
   const [roomName, setRoomName] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
-  const [scrumData, setScrumData] = useState<Scrum>({}); // スクラム詳細
-  const [sprintData, setSprintData] = useState<Sprints[]>([]); // スプリント詳細
+  const [roomData, setRoomData] = useState<Rooms[]>([]); // スプリント詳細
 
 
   useEffect(() => {
-    const fetchScrumData = async () => {
-      const { scrumData } = await fetchScrumData();
+    const fetchRoomData = async () => {
+      const rooms = await getAllRooms();
+      if (rooms) {
+        setRoomData(rooms);
+      }else{
+      }
     }
+    fetchRoomData();
   }, []);
-  //const { slug } = params;
 
-  // 開催中の部屋一覧
-  useEffect(() => {
-    const fetchActiveRooms = async () => {
-      setSprintData(await getAllActiveRooms()); // スプリントの部屋一覧を取得
-    };
-    fetchActiveRooms();
-  }, []);
 
   const handleCreateRoom = async () => {
     const uuid = uuidV4();
@@ -98,23 +93,15 @@ export const LoungeRoom = (/*{params}: {params: any}*/) => {
         <ModalHeader>今日の会議を始める</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Box textAlign="center" mb={4}>
-            <Text fontSize="lg" color="orange.700">
-              会議の詳細
-            </Text>
-            <Image
-              src=""
-              alt="Meeting Placeholder"
-              borderRadius="md"
-              boxShadow="sm"
-              mt={2}
-            />
-          </Box>
         </ModalBody>
         <ModalFooter>
           <Button colorScheme="blue" mr={3} onClick={handleCreateRoom}>
             新規作成
           </Button>
+          <Input 
+            placeholder="会議名を入力してください"
+            onChange={(e) => setRoomName(e.target.value)}
+            />
           <Button variant="outline" onClick={onClose}>
             キャンセル
           </Button>
