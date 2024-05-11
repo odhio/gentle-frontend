@@ -1,4 +1,5 @@
 import { sendAudio } from '@/api/room/api'
+import { LocalDataStream } from '@skyway-sdk/core'
 import { EventEmitter } from 'events'
 
 export class AudioRecorder {
@@ -31,7 +32,7 @@ export class AudioRecorder {
     }
   }
 
-  constructor(dataStream:MediaStream, roomId: string, userId: string, stream: MediaStream) {
+  constructor(dataStream:LocalDataStream, roomId: string, userId: string, stream: MediaStream) {
     this._audioTrack = stream.getAudioTracks()
     this._audioStream = new MediaStream(this._audioTrack)
     this._transcriptPK = ''
@@ -67,7 +68,8 @@ export class AudioRecorder {
         this._audioChunks.push(event.data)
 
         this._audioBlob = new Blob(this._audioChunks, { type: 'audio/wav' })
-        const data = await this._sendBlob(this._audioBlob)
+        if(!this._transcriptPK) return
+        const data = await this._sendBlob(this._audioBlob,this._transcriptPK)
         this._eventEmitter.emit('analysisEnd', data)
 
         this._audioChunks = []
