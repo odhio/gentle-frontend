@@ -5,15 +5,11 @@ import { RoomProvider } from '@/contexts/RoomContext'
 import Layout from '@/app/_component/Layout'
 import { LoungeRoom } from '@/feature/routes/lounge/component/Lounge'
 
-export default function Lounge(
-  {
-    /*{params}:{prams: {slug: ['sprint']}}*/
-  },
-) {
+export default function Lounge() {
   return (
     <Layout>
       <RoomProvider>
-        <LoungeRoom /*params={params}*/ />
+        <LoungeRoom />
       </RoomProvider>
     </Layout>
   )
