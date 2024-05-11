@@ -23,6 +23,13 @@ export interface SpeechMessage {
     pressure?: string;
 }
 
+export interface Sprints {
+    id: string;
+    name: string; // スプリント名
+    createdAt: number;
+    closedAt: number;
+}
+
 export interface Room {
     id: string;
     sprint: string; // スプリントID, [...slug]でルーティングする形を想定しています。
