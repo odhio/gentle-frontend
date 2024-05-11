@@ -1,7 +1,7 @@
 import { Box, Flex, Button, Link, Stack, Image, Text } from '@chakra-ui/react'
 import { FiHome } from 'react-icons/fi'
 import { FaRegBell } from 'react-icons/fa'
-import { UserProfileIcon } from '@/app/features/users/routes/user-profile-icon'
+import { UserProfileIcon } from '@/features/users/routes/user-profile-icon'
 
 const isLoggedIn = false
 
