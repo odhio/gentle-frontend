@@ -1,10 +1,12 @@
+import { API_URL } from "@/config/env";
 import { LocalDataStream } from "@skyway-sdk/core";
 
 export const sendAudio=async(dataStream:LocalDataStream, userId:string, audioBlob:Blob)=>{
   const formData = new FormData();
   formData.append("audio", audioBlob);
-  
-  const res = await fetch("/api/audio/upload", {
+
+  const res = await fetch(API_URL + "/api/audio/upload", {
+    credentials: 'include',
     method: "POST",
     body: formData,
   })
@@ -44,7 +46,8 @@ export const announceRoomLeave = async (roomId: string) => {
     ${message.message_body}
     `
     })
-    const res = await fetch("/api/generate", {
+    const res = await fetch(API_URL + "/api/generate", {
+      credentials: 'include',
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
