@@ -4,6 +4,7 @@ import {
   getRoomMessages,
   pushChatMessageEmotion,
 } from '../firebase/room'
+import { API_URL } from '@/config/env'
 
 export const sendAudio = async (
   dataStream: LocalDataStream,
@@ -13,7 +14,8 @@ export const sendAudio = async (
   const formData = new FormData()
   formData.append('audio', audioBlob)
 
-  const res = await fetch('http://127.0.0.1:8000/api/audio/upload', {
+  const res = await fetch(API_URL + '/api/audio/upload', {
+    credentials: 'include',
     method: 'POST',
     body: formData,
   })
@@ -53,8 +55,9 @@ export const announceRoomLeave = async (roomId: string) => {
     ${message.message_body}
     `
     })
-    const res = await fetch('http://localhost:8000/api/generate', {
+    const res = await fetch(API_URL + '/api/generate', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
