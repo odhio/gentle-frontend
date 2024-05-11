@@ -6,37 +6,33 @@ import { Rooms } from '@/types/DataModel';
 import { Image } from '@chakra-ui/next-js';
 
 export const LoungeRoom = (/*{params}: {params: any}*/) => {
-  const [roomName, setRoomName] = useState('');
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const router = useRouter();
-  const [roomData, setRoomData] = useState<Rooms[]>([]); // スプリント詳細
-
+  const [roomName, setRoomName] = useState('')
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const router = useRouter()
+  const [roomData, setRoomData] = useState<Rooms[]>([]) // スプリント詳細
 
   useEffect(() => {
     const fetchRoomData = async () => {
-      const rooms = await getAllRooms();
+      const rooms = await getAllRooms()
       if (rooms) {
-        setRoomData(rooms);
-      }else{
+        setRoomData(rooms)
+      } else {
       }
     }
-    fetchRoomData();
-  }, []);
-
+    fetchRoomData()
+  }, [])
 
   const handleCreateRoom = async () => {
-    const uuid = uuidV4();
-    const pk = await createRoom(uuid, roomName);
+    const uuid = uuidV4()
+    const pk = await createRoom(uuid, roomName)
     if (pk) {
-      router.push(`/room/${pk}?roomId=${uuid}&name=${roomName}`);
+      router.push(`/room/${pk}?roomId=${uuid}&name=${roomName}`)
     } else {
-      alert('作成中にエラーが発生しました。');
+      alert('作成中にエラーが発生しました。')
     }
-  };
-
+  }
 
   return (
-
     <div>
       <Box display="flex" justifyContent="center" flexDirection={'column'} gap={3} alignItems="center">
 
@@ -76,26 +72,25 @@ export const LoungeRoom = (/*{params}: {params: any}*/) => {
       </SimpleGrid>
 
       <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay />
-      <ModalContent bg="orange.50" borderRadius="lg">
-        <ModalHeader>今日の会議を始める</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-        </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleCreateRoom}>
-            新規作成
-          </Button>
-          <Input 
-            placeholder="会議名を入力してください"
-            onChange={(e) => setRoomName(e.target.value)}
+        <ModalOverlay />
+        <ModalContent bg="orange.50" borderRadius="lg">
+          <ModalHeader>今日の会議を始める</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody></ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleCreateRoom}>
+              新規作成
+            </Button>
+            <Input
+              placeholder="会議名を入力してください"
+              onChange={(e) => setRoomName(e.target.value)}
             />
-          <Button variant="outline" onClick={onClose}>
-            キャンセル
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+            <Button variant="outline" onClick={onClose}>
+              キャンセル
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
-  );
-};
+  )
+}

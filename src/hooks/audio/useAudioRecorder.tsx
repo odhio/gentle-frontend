@@ -21,99 +21,106 @@ export const useAudioRecorder = (props: Props) => {
   const { dataStream } = useRoom();
   const { loginUser } = useContext(LoginUserContext);
 
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const roomId = searchParams.get('roomId')
+  const pk = params.slug
 
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const roomId = searchParams.get("roomId");
-  const pk = params.slug;
-  
-
-  const stream = useRef<MediaStream | null>(null);
+  const stream = useRef<MediaStream | null>(null)
 
   useMemo(() => {
-    stream.current = localStream;
-  }, [localStream]);
+    stream.current = props.localStream
+  }, [props.localStream])
   useEffect(() => {
-    if (! stream.current) return;
+    if (!stream.current) return
 
-    const audioRecorder = new AudioRecorder(dataStream, roomId, loginUser,  stream.current);  
-    const startFunc =()=>{   
-      setIsRecording(true);
-      audioRecorder.startRecording();
-      audioRecorder.state = 'recording';
+    const audioRecorder = new AudioRecorder(
+      dataStream,
+      props.roomId,
+      loginUser,
+      stream.current,
+    )
+    const startFunc = () => {
+      setIsRecording(true)
+      audioRecorder.startRecording()
+      audioRecorder.state = 'recording'
     }
-    const speech = new SpeechRecognitionComponent(startFunc);
+    const speech = new SpeechRecognitionComponent(startFunc)
 
     if (speech == (null || undefined) || audioRecorder == (null || undefined)) {
-      alert(`Failed to initialize speech recognition or audio recorder:${speech} ${audioRecorder}`);
+      alert(
+        `Failed to initialize speech recognition or audio recorder:${speech} ${audioRecorder}`,
+      )
     }
 
-    audioRecorder.onError = () => {
-    };
+    audioRecorder.onError = () => {}
 
     audioRecorder.onAnalysisEnd((data) => {
-      console.log("onAnalysisEnd:", data);
-      
-      if(dataStream !== undefined && data !== undefined){
-        dataStream.write({type:"emotion", member_id: userId, emotion: data.result, "pressure": data.pressure});
-      }else{
-        console.log("dataStream or data is undefined:", dataStream, data);
+      console.log('onAnalysisEnd:', data)
+
+      if (dataStream !== undefined && data !== undefined) {
+        dataStream.write({
+          type: 'emotion',
+          member_id: props.userId,
+          emotion: data.result,
+          pressure: data.pressure,
+        })
+      } else {
+        console.log('dataStream or data is undefined:', dataStream, data)
       }
-    });
+    })
 
     speech.onFinal = async (finalTranscript) => {
-      setTranscript(finalTranscript);
+      setTranscript(finalTranscript)
 
-      if (finalTranscript === '') return; 
-      else{
+      if (finalTranscript === '') return
+      else {
         const message = {
           id: uuidV4(),
-          memberId: userId,
+          memberId: props.userId,
           createdAt: Date.now(),
-          messageBody: finalTranscript, 
-        } as SpeechMessage;
+          messageBody: finalTranscript,
+        } as SpeechMessage
 
-        const messagePK = await addMessageFB(roomId, message);
-        if (messagePK !== null && messagePK !== undefined) {          
-          audioRecorder.stopRecording(messagePK);
-          console.log("messagePK", messagePK);
+        const messagePK = await addMessageFB(roomId, message)
+        if (messagePK !== null && messagePK !== undefined) {
+          audioRecorder.stopRecording(messagePK)
+          console.log('messagePK', messagePK)
         }
       }
-      
-      audioRecorder.state = 'inactive';
-      setIsRecording(false);
-    };
+
+      audioRecorder.state = 'inactive'
+      setIsRecording(false)
+    }
 
     speech.onProgress = (progressTranscript) => {
       if (audioRecorder.state == 'recording') {
-        setInterimTranscript(progressTranscript);
+        setInterimTranscript(progressTranscript)
       } else {
-        setIsRecording(true);
+        setIsRecording(true)
 
-        audioRecorder.startRecording();
-        audioRecorder.state = 'recording';
+        audioRecorder.startRecording()
+        audioRecorder.state = 'recording'
       }
     }
     speech.onEnd = () => {
       if (isRecording) {
-        audioRecorder.stopRecording();
+        audioRecorder.stopRecording()
       } else {
       }
     }
 
     speech.onError = () => {
       // TODO: エラー処理 内部的には書き起こしが途切れないように認識再開するようになっています
-    };
+    }
 
-    audioRecorderRef.current = audioRecorder;
-    speechRecognitionRef.current = speech;
+    audioRecorderRef.current = audioRecorder
+    speechRecognitionRef.current = speech
 
     return () => {
-      audioRecorder.endRecording();
-      speech.stop();
-    };
-  }, [stream]);
-  return (
-    <></>
-  )
+      audioRecorder.endRecording()
+      speech.stop()
+    }
+  }, [stream])
+  return <></>
 }

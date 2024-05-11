@@ -1,5 +1,5 @@
-"use client"
-import useSWR from "swr";
+"use client";
+
 import { LocalAudioStream, LocalDataStream, LocalP2PRoomMember, LocalRoomMember, LocalStream, LocalVideoStream, P2PRoom, RemoteAudioStream, RemoteDataStream, RemoteVideoStream, RoomPublication, SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from "@skyway-sdk/room";
 import { SkyWayAuthToken, nowInSec, uuidV4 } from "@skyway-sdk/token";
 
@@ -8,11 +8,15 @@ import React, { ChangeEvent, createElement, use, useCallback, useContext, useEff
 import { announceRoomLeave } from "@/api/room/api";
 import { LocalAudioDisplay } from "./component/LocalAudioDisplay";
 import { RoomContext, useRoom } from "@/contexts/RoomContext";
+import { getCookie } from "cookies-next";
+import { createRoom, joinRoom, toggleRoomState } from "@/api/firebase/room";
 import { TransitionDialog } from "@/app/_component/Dialog";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Box, Button, useColorModeValue, Alert, Flex, Grid, GridItem, Heading, Square, Text, Textarea } from "@chakra-ui/react";
 import { ChatIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
+import { get } from "http";
 import { LoginUserContext } from "@/contexts/UserInfoContext";
+import { EmotionRenderer } from "./component/emotion/EmotionRenderer";
 import { ChatSpace } from "./component/datastream/ChatSpace";
 import { ChatMessage } from "@/types/DataModel";
 
@@ -196,7 +200,7 @@ export const MeetingRoom = ({ params }) => {
             setAudioStream(audio); 
             setVideoStream(video);
 
-            const res = await join(memberId, roomId, sprintId);
+            //const res = await onJoinChannel(memberId, roomId, sprintId);　// ルーム入室処理
 
 
             const me: LocalP2PRoomMember = await room.join({
@@ -206,7 +210,7 @@ export const MeetingRoom = ({ params }) => {
             if (room !== undefined) {
                 setRoom(room);
                 setMe(me);
-               // await joinRoom(roomId, loginUser.id)
+                await joinRoom(roomId, loginUser.id)
             }
 
             // AudioStreamの配信
@@ -460,6 +464,8 @@ export const MeetingRoom = ({ params }) => {
                                     <div id="remoteMediaArea">
                                         {Object.keys(userAreaDocuments).map((publicationId) => {
                                             const remoteUserArea = userAreaDocuments[publicationId];
+                                            const sortedEmotion = getEmotionByPublicationId(emotion, publicationId);
+
                                             return (
                                                 <div data-publication-id={publicationId} key={publicationId} className="video-container" style={{ position: 'relative' }}>
                                                     {userAreaDocuments[publicationId] && (
@@ -475,6 +481,12 @@ export const MeetingRoom = ({ params }) => {
                                                                 zIndex: 10
                                                             }}
                                                         >
+                                                            {/* FIXME: ユーザ毎に分けるところまではできているのですが、レンダリングタイミングに課題有です
+                                                    {sortedEmotion?.emotion !== undefined && sortedEmotion?.pressure ? (
+                                                        <EmotionRenderer emotion={sortedEmotion?.emotion} pressure={sortedEmotion?.pressure}/>
+                                                    ):(
+                                                        <></>
+                                                    )}*/}
                                                         </div>
                                                     )}
                                                     <div>
@@ -485,6 +497,7 @@ export const MeetingRoom = ({ params }) => {
                                         })}
                                     </div>
                                 </div>
+                                {/*<><RemoteMediaDisplay me={me} publications={otherUserPublications} /></>*/}
                             </Flex>
                         </GridItem>
                     </Grid>

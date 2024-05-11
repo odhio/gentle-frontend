@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   Button,
   Popover,
@@ -8,41 +8,42 @@ import {
   PopoverCloseButton,
   PopoverHeader,
   PopoverBody,
-  Box
-} from '@chakra-ui/react';
-import { EmotionLabel } from './EmotionLabel';
+  Box,
+} from '@chakra-ui/react'
+import { EmotionLabel } from './EmotionLabel'
 
 type Props = {
-  emotion: string;
-  pressure: string;
+  emotion: string
+  pressure: string
 }
 
-export const PopoverComponent=(props:Props)=> {
-  const [active, setActive] = useState(false);
+export const PopoverComponent = (props: Props) => {
+  const [active, setActive] = useState(false)
 
   useEffect(() => {
     if (props) {
-      setActive(true);
+      setActive(true)
 
       const timer = setTimeout(() => {
-        setActive(false);
-      }, 3000);
+        setActive(false)
+      }, 3000)
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer)
     }
-  }, [props]);
+  }, [props])
 
   return (
     <Box>
       <Popover isOpen={active}>
         <PopoverTrigger>
-          <Button>
-          </Button>
+          <Button></Button>
         </PopoverTrigger>
         <PopoverContent>
-          <PopoverBody><EmotionLabel emotion={props.pressure} pressure={props.pressure}/></PopoverBody>
+          <PopoverBody>
+            <EmotionLabel emotion={props.pressure} pressure={props.pressure} />
+          </PopoverBody>
         </PopoverContent>
       </Popover>
     </Box>
-  );
+  )
 }
