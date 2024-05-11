@@ -1,7 +1,7 @@
 import { client } from '@/lib/api'
 
 type Body = {
-  id: string
+  name: string
 }
 
 type Response = {

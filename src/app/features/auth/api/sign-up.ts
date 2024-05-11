@@ -1,8 +1,7 @@
 import { client } from '@/lib/api'
 
 type Body = {
-  id: string
-  password: string
+  name: string
   image: string
 }
 

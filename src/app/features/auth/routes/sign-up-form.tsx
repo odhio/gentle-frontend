@@ -29,8 +29,7 @@ const Images = [
 ]
 
 type SignUpFormData = {
-  id: string
-  password: string
+  name: string
   image: string
 }
 
@@ -80,27 +79,16 @@ export const SignUpForm = () => {
         サインアップ
       </Heading>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <FormControl isInvalid={!!errors.id}>
-          <FormLabel>ID</FormLabel>
+        <FormControl isInvalid={!!errors.name}>
+          <FormLabel>ユーザー名</FormLabel>
           <Input
-            {...register('id', { required: 'IDは必須です' })}
+            {...register('name', { required: 'ユーザー名は必須です' })}
             background={'gray.50'}
-            placeholder="ユーザ名またはメールアドレスを入力してください"
+            placeholder="ユーザー名を入力してください"
             variant="filled"
             type="text"
           />
-          <FormErrorMessage>{errors.id?.message}</FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.password}>
-          <FormLabel>パスワード</FormLabel>
-          <Input
-            {...register('password', { required: 'パスワードは必須です' })}
-            background={'gray.50'}
-            placeholder="パスワードを入力してください"
-            variant="filled"
-            type="password"
-          />
-          <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
+          <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
         </FormControl>
         <FormControl isInvalid={!!errors.image}>
           <FormLabel as="legend">画像</FormLabel>

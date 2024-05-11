@@ -18,7 +18,7 @@ import { login } from '../api/login'
 import { useRouter } from 'next/navigation'
 
 type LoginFormData = {
-  id: string
+  name: string
 }
 
 export const LoginForm = () => {
@@ -68,16 +68,16 @@ export const LoginForm = () => {
         参加者名
       </Heading>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <FormControl isInvalid={!!errors.id}>
-          <FormLabel>ID</FormLabel>
+        <FormControl isInvalid={!!errors.name}>
+          <FormLabel>ユーザー名</FormLabel>
           <Input
-            {...register('id', { required: 'IDを入力してください' })}
+            {...register('name', { required: 'ユーザー名を入力してください' })}
             background={'gray.50'}
-            placeholder="ユーザ名またはメールアドレスを入力してください"
+            placeholder="ユーザ名を入力してください"
             variant="filled"
             type="text"
           />
-          <FormErrorMessage>{errors.id?.message}</FormErrorMessage>
+          <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
         </FormControl>
         <Button
           type="submit"
