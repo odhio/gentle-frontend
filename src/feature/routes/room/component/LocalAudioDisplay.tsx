@@ -7,6 +7,7 @@ import { LocalDataStream } from '@skyway-sdk/core';
 interface Props {
     userId?: string | undefined;
     localStream: MediaStream;
+    roomId: string;
 }
 
 export const LocalAudioDisplay = (props: Props) => {

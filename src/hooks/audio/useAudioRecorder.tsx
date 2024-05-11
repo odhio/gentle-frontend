@@ -2,13 +2,17 @@ import { AudioRecorder } from '@/feature/routes/room/component/speech/AudioRecor
 import { SpeechRecognitionComponent } from '@/feature/routes/room/component/speech/SpeechRecognition';
 import { useRoom } from '@/contexts/RoomContext';
 import { useEffect, useState, useRef, useMemo, useContext } from 'react';
-import { addMessageFB } from '@/api/firebase/room';
 import { SpeechMessage } from '@/types/DataModel';
 import { uuidV4 } from '@skyway-sdk/token';
 import { LoginUserContext } from '@/contexts/UserInfoContext';
 import { useParams, useSearchParams } from 'next/navigation';
+interface Props {
+  userId?: string | undefined;
+  localStream: MediaStream;
+  roomId: string;
+}
 
-export const useAudioRecorder = (userId: string | undefined, localStream: MediaStream) => {
+export const useAudioRecorder = (props: Props) => {
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [isRecording, setIsRecording] = useState(false);
