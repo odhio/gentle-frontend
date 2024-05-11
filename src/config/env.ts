@@ -9,3 +9,6 @@ export const FIREBASE_STORAGE_BUCKET =
 export const FIREBASE_MESSAGING_SENDER_ID =
   process.env['NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'] ?? ''
 export const FIREBASE_APP_ID = process.env['NEXT_PUBLIC_FIREBASE_APP_ID'] ?? ''
+
+export const API_URL =
+  process.env['NEXT_PUBLIC_API_URL'] ?? 'http://127.0.0.1:8000'

@@ -10,8 +10,13 @@ import {
   MenuItem,
   MenuDivider,
   Center,
+  useToast,
+  Spinner,
 } from '@chakra-ui/react'
+import { useCallback, useState } from 'react'
 import { FiHome } from 'react-icons/fi'
+import { logout } from '../../auth/api/logout'
+import { useRouter } from 'next/navigation'
 
 const MOCK_USER = {
   name: 'John Doe',
@@ -19,9 +24,32 @@ const MOCK_USER = {
 }
 
 export const UserProfileIcon = () => {
-  const handleLogout = () => {
-    console.log('logout')
-  }
+  const router = useRouter()
+  const toast = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleLogout = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const response = await logout()
+      if (response.success) {
+        toast({
+          description: 'ログインしました',
+          status: 'success',
+        })
+        router.push('/')
+      } else {
+        throw new Error('Logout failed')
+      }
+    } catch (error) {
+      toast({
+        description: 'ログアウトに失敗しました',
+        status: 'error',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
   return (
     <Menu>
       <MenuButton
@@ -44,7 +72,10 @@ export const UserProfileIcon = () => {
           <Text fontSize={'sm'}>HOME</Text>
         </MenuItem>
         <MenuItem onClick={handleLogout} rounded={'md'}>
-          <Text fontSize={'sm'}>ログアウト</Text>
+          <Text fontSize={'sm'}>
+            {isLoading ? <Spinner /> : ''}
+            ログアウト
+          </Text>
         </MenuItem>
       </MenuList>
     </Menu>

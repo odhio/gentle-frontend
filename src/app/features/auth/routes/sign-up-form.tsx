@@ -13,10 +13,14 @@ import {
   Text,
   Link,
   FormErrorMessage,
+  useToast,
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { useForm } from 'react-hook-form'
 import { useCallback } from 'react'
+import { signUp } from '../api/sign-up'
+import { useRouter } from 'next/navigation'
+
 
 const Images = [
   '/asset/userassets/icon001.jpg',
@@ -32,13 +36,35 @@ type SignUpFormData = {
 }
 
 export const SignUpForm = () => {
+  const router = useRouter()
+  const toast = useToast()
+
   const {
     register,
     handleSubmit,
+    reset,
     formState: { isSubmitting, isValid, errors },
   } = useForm<SignUpFormData>()
-  const onSubmit = useCallback((data: SignUpFormData) => {
-    console.log(data)
+  const onSubmit = useCallback(async (data: SignUpFormData) => {
+    try {
+      const response = await signUp(data)
+      if (response.success) {
+        toast({
+          description: '登録しました',
+          status: 'success',
+        })
+        router.push('/')
+      } else {
+        throw new Error('Sign up failed')
+      }
+    } catch (error) {
+      toast({
+        description: '登録できませんでした',
+        status: 'error',
+      })
+    } finally {
+      reset()
+    }
   }, [])
 
   return (
