@@ -18,6 +18,8 @@ import {
   Thead,
   Tr,
   Flex,
+  Heading,
+  Text
 } from '@chakra-ui/react'
 import { useRoomDetail } from '../api/getRoomDetail'
 import { EmotionLabel } from '@/feature/routes/room/component/emotion/EmotionLabel'
@@ -45,6 +47,20 @@ export const RoomDetailModal = ({ isOpen, onClose, roomUuid }: Props) => {
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          <Flex flexDirection={'column'} gap={2}>
+            <Heading size={'sm'}>
+              会議の要約
+            </Heading>
+            {isLoading ? (
+              <Skeleton height="20px" />
+            ) : (
+              <Text >{data?.summary}</Text>
+            )}
+          </Flex>
+          <Flex flexDirection={'column'} gap={2}>
+          <Heading size={'sm'}>
+              会話履歴
+            </Heading>
           <TableContainer>
             <Table variant="simple">
               <TableCaption>Imperial to metric conversion factors</TableCaption>
@@ -75,6 +91,7 @@ export const RoomDetailModal = ({ isOpen, onClose, roomUuid }: Props) => {
               </Tbody>
             </Table>
           </TableContainer>
+          </Flex>
         </ModalBody>
       </ModalContent>
     </Modal>
