@@ -4,7 +4,6 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { AUTH_TOKEN_KEY } from '@/lib/auth'
 
-
 export default function AuthLayout({
   children,
 }: Readonly<{

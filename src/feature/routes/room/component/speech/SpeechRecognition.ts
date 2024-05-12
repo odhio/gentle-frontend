@@ -1,8 +1,9 @@
 import { uuidV4 } from '@skyway-sdk/token'
 
 export class SpeechRecognitionComponent {
-  recognition: SpeechRecognition = new window.webkitSpeechRecognition() || new window.SpeechRecognition();
-  running:boolean;
+  recognition: SpeechRecognition =
+    new window.webkitSpeechRecognition() || new window.SpeechRecognition()
+  running: boolean
 
   onFinal?: (str: string) => void
   onProgress?: (str: string) => void

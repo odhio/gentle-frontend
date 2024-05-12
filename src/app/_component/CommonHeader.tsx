@@ -24,7 +24,6 @@ import { LoginUserContext } from '@/contexts/UserInfoContext'
 import { getCookie, deleteCookie } from 'cookies-next'
 import { useRouter } from 'next/navigation'
 
-
 export default function CommonHeader() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { setLoginUser } = useContext(LoginUserContext)

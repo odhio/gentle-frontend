@@ -23,16 +23,26 @@ export class AudioRecorder {
     if (this._mediaRecorder == (null || undefined)) return
   }
 
-  private async _sendBlob(blob: Blob, messageId:string) {
+  private async _sendBlob(blob: Blob, messageId: string) {
     try {
-      const data = await sendAudio(this.dataStream, this.userId, messageId, blob)
+      const data = await sendAudio(
+        this.dataStream,
+        this.userId,
+        messageId,
+        blob,
+      )
       return data
     } catch (e) {
       console.error(e)
     }
   }
 
-  constructor(dataStream:LocalDataStream, roomId: string, userId: string, stream: MediaStream) {
+  constructor(
+    dataStream: LocalDataStream,
+    roomId: string,
+    userId: string,
+    stream: MediaStream,
+  ) {
     this._audioTrack = stream.getAudioTracks()
     this._audioStream = new MediaStream(this._audioTrack)
     this._transcriptPK = ''
@@ -68,8 +78,8 @@ export class AudioRecorder {
         this._audioChunks.push(event.data)
 
         this._audioBlob = new Blob(this._audioChunks, { type: 'audio/wav' })
-        if(!this._transcriptPK) return
-        const data = await this._sendBlob(this._audioBlob,this._transcriptPK)
+        if (!this._transcriptPK) return
+        const data = await this._sendBlob(this._audioBlob, this._transcriptPK)
         this._eventEmitter.emit('analysisEnd', data)
 
         this._audioChunks = []
