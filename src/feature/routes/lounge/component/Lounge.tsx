@@ -17,6 +17,8 @@ export const LoungeRoom = () => {
       if (rooms) {
         setRoomData(rooms)
       } else {
+        console.log('no rooms');
+        
       }
     }
     fetchRoomData()
@@ -24,7 +26,7 @@ export const LoungeRoom = () => {
 
   const handleCreateRoom = async () => {
     const uuid = uuidV4()
-    const pk = await createRoom(uuid, roomName)
+    const pk = await createRoom({room_uuid:uuid, name:roomName})
     if (pk) {
       router.push(`/room/${pk}?roomId=${uuid}&name=${roomName}`)
     } else {
@@ -39,7 +41,8 @@ export const LoungeRoom = () => {
         <Button mx={'auto'} h={'60px'} w={'fit-content'} px={'15px'} onClick={onOpen}>今日の会議を始める</Button>
       </Box>
       <SimpleGrid mx={50} mt={10} columns={[1, 2, 3,4,5,6,7]} spacing={4}>
-        {roomData && roomData.map((room : ResRoom) => (
+        {roomData.length > 0 ? 
+          ( roomData.map((room : ResRoom) => (
           <Card
             bg={room?.closed_at ? 'gray.100' : 'white'}
             p={4}  // Padding inside the Box
@@ -67,7 +70,9 @@ export const LoungeRoom = () => {
               )}
             </CardFooter>
           </Card>
-        ))}
+        ))):(
+          <></>
+        )}
       </SimpleGrid>
 
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -77,13 +82,13 @@ export const LoungeRoom = () => {
           <ModalCloseButton />
           <ModalBody></ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleCreateRoom}>
-              新規作成
-            </Button>
             <Input
               placeholder="会議名を入力してください"
               onChange={(e) => setRoomName(e.target.value)}
             />
+            <Button colorScheme="blue" mr={3} onClick={handleCreateRoom}>
+              新規作成
+            </Button>
             <Button variant="outline" onClick={onClose}>
               キャンセル
             </Button>

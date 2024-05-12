@@ -9,7 +9,6 @@ const Layout = ({ children }) => {
   const value = { loginUser, setLoginUser }
   return (
     <>
-      <CommonHeader />
       <main>{children}</main>
     </>
   )

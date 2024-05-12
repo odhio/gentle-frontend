@@ -1173,6 +1173,15 @@
   resolved "https://registry.npmjs.org/@skyway-sdk/model/-/model-1.0.1.tgz"
   integrity sha512-tMMptnun0r/jYsoSbFn6C468DtPlp51CLxvSbhzvVhhFIxhJsbE8F3DaW6Or5VSz5o8wjY2q/EyADGpjI0KUXA==
 
+"@skyway-sdk/room@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.npmjs.org/@skyway-sdk/room/-/room-1.8.0.tgz"
+  integrity sha512-sss60YSxTGeRLbAqXUIRivyJtZ8E0dUf3PhIa2VC7cCCJrKBcDBz97yJzwWM0Jj8JXvJ0SXT++WvtUqEt4UqLQ==
+  dependencies:
+    "@skyway-sdk/core" "^1.8.0"
+    "@skyway-sdk/sfu-bot" "^1.8.0"
+    uuid "^9.0.0"
+
 "@skyway-sdk/rtc-api-client@^1.6.0":
   version "1.6.0"
   resolved "https://registry.npmjs.org/@skyway-sdk/rtc-api-client/-/rtc-api-client-1.6.0.tgz"
@@ -1192,6 +1201,24 @@
     "@skyway-sdk/model" "^1.0.1"
     isomorphic-ws "^4.0.1"
     uuid "^9.0.0"
+
+"@skyway-sdk/sfu-api-client@^1.4.6":
+  version "1.4.6"
+  resolved "https://registry.npmjs.org/@skyway-sdk/sfu-api-client/-/sfu-api-client-1.4.6.tgz"
+  integrity sha512-SOXrMwRm6tXv5sHazyTX5KOCa5hsyCye8MkEcYFFUlDbXk7qjH5TlTA71TxTnsRZUoXckCBQfvawtOVNNuylOg==
+  dependencies:
+    "@skyway-sdk/common" "^1.4.6"
+    mediasoup-client "^3.6.52"
+
+"@skyway-sdk/sfu-bot@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.npmjs.org/@skyway-sdk/sfu-bot/-/sfu-bot-1.8.0.tgz"
+  integrity sha512-DOJY1oM+aVwyHSqjjtjhs7CbhsbbSDLJc5QNr4GboY9/tXOvA+x72z2V+Uvh04IbWWb6LT4RCGAz1WlrJR24xQ==
+  dependencies:
+    "@skyway-sdk/core" "^1.8.0"
+    "@skyway-sdk/sfu-api-client" "^1.4.6"
+    lodash "4.17.21"
+    mediasoup-client "3.6.82"
 
 "@skyway-sdk/signaling-client@^1.0.4":
   version "1.0.4"
@@ -1231,6 +1258,13 @@
   resolved "https://registry.npmjs.org/@types/cookie/-/cookie-0.6.0.tgz"
   integrity sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==
 
+"@types/debug@^4.1.7":
+  version "4.1.12"
+  resolved "https://registry.npmjs.org/@types/debug/-/debug-4.1.12.tgz"
+  integrity sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==
+  dependencies:
+    "@types/ms" "*"
+
 "@types/json5@^0.0.29":
   version "0.0.29"
   resolved "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz"
@@ -1247,6 +1281,11 @@
   version "4.17.1"
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.1.tgz"
   integrity sha512-X+2qazGS3jxLAIz5JDXDzglAF3KpijdhFxlf/V1+hEsOUc+HnWi81L/uv/EvGuV90WY+7mPGFCUDGfQC3Gj95Q==
+
+"@types/ms@*":
+  version "0.7.34"
+  resolved "https://registry.npmjs.org/@types/ms/-/ms-0.7.34.tgz"
+  integrity sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==
 
 "@types/node@^16.10.2":
   version "16.18.97"
@@ -1564,6 +1603,13 @@ available-typed-arrays@^1.0.7:
   integrity sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==
   dependencies:
     possible-typed-array-names "^1.0.0"
+
+awaitqueue@^3.0.1:
+  version "3.0.2"
+  resolved "https://registry.npmjs.org/awaitqueue/-/awaitqueue-3.0.2.tgz"
+  integrity sha512-AVAtRwmf0DNSesMdyanFKKejTrOnjdKtz5LIDQFu2OTUgXvB/CRTYMrkPAF/2GCF9XBtYVxSwxDORlD41S+RyQ==
+  dependencies:
+    debug "^4.3.4"
 
 axe-core@=4.7.0:
   version "4.7.0"
@@ -2313,6 +2359,24 @@ esutils@^2.0.2:
   resolved "https://registry.npmjs.org/esutils/-/esutils-2.0.3.tgz"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
+event-target-shim@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.npmjs.org/event-target-shim/-/event-target-shim-6.0.2.tgz"
+  integrity sha512-8q3LsZjRezbFZ2PN+uP+Q7pnHUMmAOziU2vA2OwoFaKIXxlxl38IylhSSgUorWu/rf4er67w0ikBqjBFk/pomA==
+
+events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
+fake-mediastreamtrack@^1.1.6:
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/fake-mediastreamtrack/-/fake-mediastreamtrack-1.2.0.tgz"
+  integrity sha512-AxHtlEmka1sqNoe3Ej1H1hJc9gjjO/6vCbCPm4D4QeEXvzhjYumA+iZ7wOi2WrmkAhGElHhBgWoNgJhFccectA==
+  dependencies:
+    event-target-shim "^6.0.2"
+    uuid "^9.0.0"
+
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
@@ -2586,6 +2650,13 @@ graphemer@^1.4.0:
   version "1.4.0"
   resolved "https://registry.npmjs.org/graphemer/-/graphemer-1.4.0.tgz"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
+
+h264-profile-level-id@^1.0.1:
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/h264-profile-level-id/-/h264-profile-level-id-1.1.1.tgz"
+  integrity sha512-xOEl3xKpiRrKIqSfolN+9gDdjR8aktKeB92CHIJohz8KtLF0Mceshgfi9pOyUhCpZmQzzwxGMSSxQvHTgGzrGw==
+  dependencies:
+    debug "^4.3.4"
 
 has-bigints@^1.0.1, has-bigints@^1.0.2:
   version "1.0.2"
@@ -3040,6 +3111,11 @@ lodash.mergewith@4.6.2:
   resolved "https://registry.npmjs.org/lodash.mergewith/-/lodash.mergewith-4.6.2.tgz"
   integrity sha512-GK3g5RPZWTRSeLSpgP8Xhra+pnjBC56q9FZYe1d5RN3TJ35dbkGy3YqBSMbyCrlbi+CM9Z3Jk5yTL7RCsqboyQ==
 
+lodash@4.17.21:
+  version "4.17.21"
+  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
 loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.4.0:
   version "1.4.0"
   resolved "https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz"
@@ -3058,6 +3134,22 @@ lru-cache@^6.0.0:
   integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
   dependencies:
     yallist "^4.0.0"
+
+mediasoup-client@^3.6.52, mediasoup-client@3.6.82:
+  version "3.6.82"
+  resolved "https://registry.npmjs.org/mediasoup-client/-/mediasoup-client-3.6.82.tgz"
+  integrity sha512-YtxxtpBcuHc2vroTiJKINiFRpxqyLQgJe0zvfsGEEUpQsPc/Lv2WKjFL2ucSoSWt5WBz6LQdWam/IlBR6GUcYw==
+  dependencies:
+    "@types/debug" "^4.1.7"
+    awaitqueue "^3.0.1"
+    bowser "^2.11.0"
+    debug "^4.3.4"
+    events "^3.3.0"
+    fake-mediastreamtrack "^1.1.6"
+    h264-profile-level-id "^1.0.1"
+    queue-microtask "^1.2.3"
+    sdp-transform "^2.14.1"
+    supports-color "^9.3.1"
 
 merge2@^1.3.0, merge2@^1.4.1:
   version "1.4.1"
@@ -3456,7 +3548,7 @@ punycode@^2.1.0:
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-queue-microtask@^1.2.2:
+queue-microtask@^1.2.2, queue-microtask@^1.2.3:
   version "1.2.3"
   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
@@ -3886,6 +3978,11 @@ supports-color@^7.1.0:
   integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==
   dependencies:
     has-flag "^4.0.0"
+
+supports-color@^9.3.1:
+  version "9.4.0"
+  resolved "https://registry.npmjs.org/supports-color/-/supports-color-9.4.0.tgz"
+  integrity sha512-VL+lNrEoIXww1coLPOmiEmK/0sGigko5COxI09KzHc2VJXJsQ37UaQ+8quuxjDeA7+KnLGTWRyOXSLLR2Wb4jw==
 
 supports-preserve-symlinks-flag@^1.0.0:
   version "1.0.0"

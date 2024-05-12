@@ -2,12 +2,9 @@
 
 import { LocalAudioStream, LocalDataStream, LocalP2PRoomMember, LocalRoomMember, LocalStream, LocalVideoStream, P2PRoom, RemoteAudioStream, RemoteDataStream, RemoteVideoStream, RoomPublication, SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from "@skyway-sdk/room";
 import { SkyWayAuthToken, nowInSec, uuidV4 } from "@skyway-sdk/token";
-
-import React, { ChangeEvent, createElement, use, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react"
-
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { LocalAudioDisplay } from "./component/LocalAudioDisplay";
 import { RoomContext, useRoom } from "@/contexts/RoomContext";
-import { createRoom, joinRoom, toggleRoomState } from "@/api/firebase/room";
 import { TransitionDialog } from "@/app/_component/Dialog";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Box, Button, useColorModeValue, Alert, Flex, Grid, GridItem, Heading, Square, Text, Textarea } from "@chakra-ui/react";
@@ -16,7 +13,7 @@ import { LoginUserContext } from "@/contexts/UserInfoContext";
 import { EmotionRenderer } from "./component/emotion/EmotionRenderer";
 import { ChatSpace } from "./component/datastream/ChatSpace";
 import { ChatMessage } from "@/types/DataModel";
-import { closeRoom } from "@/api/db/room";
+import { closeRoom, joinRoom } from "@/api/db/room";
 
 interface RemoteMediaArea {
     [key: string]: HTMLElement;
@@ -42,9 +39,15 @@ const getEmotionByPublicationId = (emotions: PopoverEmotions[], publicationId: s
 
 };
 
+
 export const MeetingRoom = ({ params }) => {
+    const loginUser = {
+        id: "sample",
+        name: "sample",
+    }
+
     const [localStream, setLocalStream] = useState<MediaStream>();
-    const { loginUser, setLoginUser } = useContext(LoginUserContext) || {};
+    //const { loginUser, setLoginUser } = useContext(LoginUserContext) || {};
 
     const searchParams = useSearchParams();
     const roomId = searchParams.get("roomId");
@@ -68,7 +71,7 @@ export const MeetingRoom = ({ params }) => {
     const [information, setInformation] = useState<string>();
 
     useEffect(() => {
-        if (information !== '') {
+        if (information !== '' && information !== undefined) {
           const timer = setTimeout(() => {
             setInformation(undefined);
           }, 3000);
@@ -207,7 +210,7 @@ export const MeetingRoom = ({ params }) => {
             if (room !== undefined && me !== undefined && roomId !== undefined) {
                 setRoom(room);
                 setMe(me);
-                await joinRoom(roomId, loginUser.id)
+                await joinRoom({room_uuid:roomId, user_uuid: loginUser.id})
             }
 
             // AudioStreamの配信
