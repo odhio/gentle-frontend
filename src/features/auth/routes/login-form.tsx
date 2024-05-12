@@ -40,7 +40,7 @@ export const LoginForm = () => {
           description: 'ログインしました',
           status: 'success',
         })
-        router.push('/room/history')
+        router.push('/lounge')
       } else {
         throw new Error('Login failed')
       }
