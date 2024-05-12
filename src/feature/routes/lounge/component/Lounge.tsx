@@ -3,7 +3,6 @@ import { Box, Button, Card, CardBody, CardFooter, CardHeader, Flex, HStack, Head
 import { useRouter } from 'next/navigation';
 import { uuidV4 } from '@skyway-sdk/token';
 import { createRoom, getAllRooms } from '@/api/db/room';
-import { createMessage } from '@/api/db/message';
 
 export const LoungeRoom = () => {
   const [roomName, setRoomName] = useState('')
@@ -11,19 +10,7 @@ export const LoungeRoom = () => {
   const router = useRouter()
   const [roomData, setRoomData] = useState([]) 
 
-  const test = async () => {
-    const body = {
-      room_uuid: uuidV4(),
-      user_uuid: uuidV4(),
-      message: 'test',
-    }
-    console.log(await createMessage(body));
-  }
-
-
   useEffect(() => {
-    test();
-
     const fetchRoomData = async () => {
       const rooms = await getAllRooms()
       if (rooms) {
@@ -63,7 +50,7 @@ export const LoungeRoom = () => {
             key={room.id} >
             <CardHeader>
               <Heading size='md' mb={3} display={'inline-block'}>
-                {room.createdAt ? room.createdAt : ""} {/*仮置き*/}
+                {room.name ? room.name : "過去の会議"}
               </Heading>
             </CardHeader>
             <CardBody>
@@ -75,7 +62,7 @@ export const LoungeRoom = () => {
               ) : (
                 <HStack spacing={4}>
                   <Text>今日の会議を始めましょう</Text>
-                  <Button as="a" href={`/room/${room?.id}`}>
+                  <Button as="a" href={`/room/${room?.uuid}`}>
                     参加
                   </Button>
                 </HStack>

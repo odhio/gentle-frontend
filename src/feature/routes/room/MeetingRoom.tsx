@@ -22,6 +22,10 @@ interface RenderItem {
     labels?: { member: String, emotion: string, pressure: string }
     chat?: { member: string, data: string }
 }
+interface UserRenderArea {
+    [key: string]: RenderItem
+}
+
 export interface PopoverEmotions {
 
     member: string;

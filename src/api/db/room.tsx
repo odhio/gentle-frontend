@@ -21,7 +21,6 @@ const JoinRoomKEY = () => '/api/room_members/join';
 
 export const getAllRooms = async () => {
   const { data } = await client.get<Response>(getAllRoomsKEY())
-  console.log(data);
   
   return data
 }

@@ -25,8 +25,9 @@ export class AudioRecorder {
 
   private async _sendBlob(blob: Blob, messageId:string) {
     try {
-      const data = await sendAudio(this.dataStream, this.userId, messageId, blob)
-      return data
+        
+        const data = await sendAudio(this.dataStream, this.userId, messageId, blob)
+        return data
     } catch (e) {
       console.error(e)
     }
