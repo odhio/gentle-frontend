@@ -37,7 +37,7 @@ export const UserProfileIcon = () => {
           description: 'ログインしました',
           status: 'success',
         })
-        router.push('/')
+        router.push('/room/history')
       } else {
         throw new Error('Logout failed')
       }

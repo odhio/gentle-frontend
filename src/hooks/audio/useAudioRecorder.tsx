@@ -1,25 +1,25 @@
-import { AudioRecorder } from '@/feature/routes/room/component/speech/AudioRecorder';
-import { SpeechRecognitionComponent } from '@/feature/routes/room/component/speech/SpeechRecognition';
-import { useRoom } from '@/contexts/RoomContext';
-import { useEffect, useState, useRef, useMemo, useContext } from 'react';
-import { SpeechMessage } from '@/types/DataModel';
-import { uuidV4 } from '@skyway-sdk/token';
-import { LoginUserContext } from '@/contexts/UserInfoContext';
-import { useParams, useSearchParams } from 'next/navigation';
+import { AudioRecorder } from '@/feature/routes/room/component/speech/AudioRecorder'
+import { SpeechRecognitionComponent } from '@/feature/routes/room/component/speech/SpeechRecognition'
+import { useRoom } from '@/contexts/RoomContext'
+import { useEffect, useState, useRef, useMemo, useContext } from 'react'
+import { SpeechMessage } from '@/types/DataModel'
+import { uuidV4 } from '@skyway-sdk/token'
+import { LoginUserContext } from '@/contexts/UserInfoContext'
+import { useParams, useSearchParams } from 'next/navigation'
 interface Props {
-  userId?: string | undefined;
-  localStream: MediaStream;
-  roomId: string;
+  userId?: string | undefined
+  localStream: MediaStream
+  roomId: string
 }
 
 export const useAudioRecorder = (props: Props) => {
-  const [transcript, setTranscript] = useState('');
-  const [interimTranscript, setInterimTranscript] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const audioRecorderRef = useRef<AudioRecorder>();
-  const speechRecognitionRef = useRef<SpeechRecognitionComponent>();
-  const { dataStream } = useRoom();
-  const { loginUser } = useContext(LoginUserContext);
+  const [transcript, setTranscript] = useState('')
+  const [interimTranscript, setInterimTranscript] = useState('')
+  const [isRecording, setIsRecording] = useState(false)
+  const audioRecorderRef = useRef<AudioRecorder>()
+  const speechRecognitionRef = useRef<SpeechRecognitionComponent>()
+  const { dataStream } = useRoom()
+  const { loginUser } = useContext(LoginUserContext)
 
   const params = useParams()
   const searchParams = useSearchParams()

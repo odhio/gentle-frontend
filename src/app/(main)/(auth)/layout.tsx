@@ -4,7 +4,6 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { AUTH_TOKEN_KEY } from '@/lib/auth'
 
-
 export default function AuthLayout({
   children,
 }: Readonly<{
@@ -13,7 +12,7 @@ export default function AuthLayout({
   const store = cookies()
   const token = store.get(AUTH_TOKEN_KEY)
   if (token) {
-    return redirect('/')
+    return redirect('/room/history')
   }
 
   return <>{children}</>
