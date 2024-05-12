@@ -2,15 +2,14 @@
 
 import { LocalAudioStream, LocalDataStream, LocalP2PRoomMember, LocalRoomMember, LocalStream, LocalVideoStream, P2PRoom, RemoteAudioStream, RemoteDataStream, RemoteVideoStream, RoomPublication, SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from "@skyway-sdk/room";
 import { SkyWayAuthToken, nowInSec, uuidV4 } from "@skyway-sdk/token";
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { LocalAudioDisplay } from "./component/LocalAudioDisplay";
 import { RoomContext, useRoom } from "@/contexts/RoomContext";
 import { TransitionDialog } from "@/app/_component/Dialog";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Box, Button, useColorModeValue, Alert, Flex, Grid, GridItem, Heading, Square, Text, Textarea } from "@chakra-ui/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Box, Button, useColorModeValue, Alert, Flex, Grid, GridItem, Heading, Text, Textarea } from "@chakra-ui/react";
 import { ChatIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
 import { LoginUserContext } from "@/contexts/UserInfoContext";
-import { EmotionRenderer } from "./component/emotion/EmotionRenderer";
 import { ChatSpace } from "./component/datastream/ChatSpace";
 import { ChatMessage } from "@/types/DataModel";
 import { closeRoom, joinRoom } from "@/api/db/room";
@@ -23,10 +22,6 @@ interface RenderItem {
     labels?: { member: String, emotion: string, pressure: string }
     chat?: { member: string, data: string }
 }
-interface UserRenderArea {
-    [key: string]: RenderItem
-}
-
 export interface PopoverEmotions {
 
     member: string;
@@ -149,7 +144,7 @@ export const MeetingRoom = ({ params }) => {
         try {
             if (room.members.length == 1) {
                 if (roomId == undefined) return;
-                await closeRoom(roomId);
+                await closeRoom({room_uuid:roomId});
                 for (const pub of me.publications) await me.unpublish(pub.id);
                 await me.leave();
                 setRoom(undefined);
@@ -174,8 +169,8 @@ export const MeetingRoom = ({ params }) => {
     const sendMessage = () => {
         if (dataStream == (null || undefined)) return;
         if (inputMessage == "") return;
-        setOutputTextChat(prev => [...prev, { memberId: me?.id , memberName: loginUser?.name ?? "名無し", message: inputMessage } as ChatMessage]);
-        dataStream.write({ memberId: me?.id ?? "", memberName: loginUser?.name ?? "名無し", type: "text", message: inputMessage });
+        setOutputTextChat(prev => [...prev, { memberId: me?.id , memberName: userInfo?.name ?? "名無し", message: inputMessage } as ChatMessage]);
+        dataStream.write({ memberId: me?.id ?? "", memberName: userInfo?.name ?? "名無し", type: "text", message: inputMessage });
         setInputMessage("");
     }
 

@@ -2,16 +2,28 @@ import { useEffect, useState } from 'react';
 import { Box, Button, Card, CardBody, CardFooter, CardHeader, Flex, HStack, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, SimpleGrid, Text, useDisclosure } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { uuidV4 } from '@skyway-sdk/token';
-import { Rooms } from '@/types/DataModel';
-import { ResGetAllRooms, ResRoom, createRoom, getAllRooms } from '@/api/db/room';
+import { createRoom, getAllRooms } from '@/api/db/room';
+import { createMessage } from '@/api/db/message';
 
 export const LoungeRoom = () => {
   const [roomName, setRoomName] = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
-  const [roomData, setRoomData] = useState<ResRoom[]>([]) 
+  const [roomData, setRoomData] = useState([]) 
+
+  const test = async () => {
+    const body = {
+      room_uuid: uuidV4(),
+      user_uuid: uuidV4(),
+      message: 'test',
+    }
+    console.log(await createMessage(body));
+  }
+
 
   useEffect(() => {
+    test();
+
     const fetchRoomData = async () => {
       const rooms = await getAllRooms()
       if (rooms) {
@@ -42,7 +54,7 @@ export const LoungeRoom = () => {
       </Box>
       <SimpleGrid mx={50} mt={10} columns={[1, 2, 3,4,5,6,7]} spacing={4}>
         {roomData.length > 0 ? 
-          ( roomData.map((room : ResRoom) => (
+          ( roomData.map((room) => (
           <Card
             bg={room?.closed_at ? 'gray.100' : 'white'}
             p={4}  // Padding inside the Box

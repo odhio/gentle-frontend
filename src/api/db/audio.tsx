@@ -19,17 +19,6 @@ export const sendAudio = async (dataStream: LocalDataStream, body:SendAudioBody)
   });
 
   const data = res.data;
-  const formattedData = { result: data.result, pressure: data.pressure };
-  if (dataStream !== undefined) {
-    const writeBody = async (emotion) => {
-      dataStream.write({
-        type: 'emotion',
-        member_id: userId,
-        emotion: emotion['result'],
-        pressure: emotion['pressure'],
-      })
-    }
-    writeBody(data)
-  }
+  return data;
 };
 

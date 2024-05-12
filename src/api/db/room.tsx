@@ -1,4 +1,3 @@
-import { API_URL } from "@/config/env";
 import { client } from "@/lib/api";
 
 type CloseRoomBody = {
