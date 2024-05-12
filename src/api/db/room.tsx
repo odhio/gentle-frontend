@@ -1,3 +1,12 @@
+export interface ResRoom {
+  uuid: string
+  name: string
+  closed_at?: Date | null // Optional field which can be Date or null
+}
+export interface ResGetAllRooms {
+  rooms: ResRoom[]
+}
+
 export const getAllRooms = async () => {
   try {
     const response = await fetch('/api/rooms/get_all', {

@@ -24,13 +24,13 @@ import {
 import { useRouter } from 'next/navigation'
 import { uuidV4 } from '@skyway-sdk/token'
 import { Rooms } from '@/types/DataModel'
-import { Image } from '@chakra-ui/next-js'
+import { ResGetAllRooms, ResRoom, createRoom, getAllRooms } from '@/api/db/room'
 
-export const LoungeRoom = (/*{params}: {params: any}*/) => {
+export const LoungeRoom = () => {
   const [roomName, setRoomName] = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
-  const [roomData, setRoomData] = useState<Rooms[]>([]) // スプリント詳細
+  const [roomData, setRoomData] = useState<ResRoom[]>([])
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -63,7 +63,7 @@ export const LoungeRoom = (/*{params}: {params: any}*/) => {
         alignItems="center"
       >
         <Heading textAlign={'center'} mt={5} size={'xl'}>
-          {roomData.name ?? 'ここにスクラム名'}
+          {}
         </Heading>
         <Button
           mx={'auto'}
@@ -77,9 +77,9 @@ export const LoungeRoom = (/*{params}: {params: any}*/) => {
       </Box>
       <SimpleGrid mx={50} mt={10} columns={[1, 2, 3, 4, 5, 6, 7]} spacing={4}>
         {roomData &&
-          roomData.map((room) => (
+          roomData.map((room: ResRoom) => (
             <Card
-              bg={room?.createdAt ? 'gray.100' : 'white'}
+              bg={room?.closed_at ? 'gray.100' : 'white'}
               p={4} // Padding inside the Box
               borderRadius="md" // Rounded corners
               transition="background 0.3s, opacity 0.3s" // Smooth transition

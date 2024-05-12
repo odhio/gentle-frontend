@@ -13,27 +13,19 @@ import {
   useDisclosure,
   useColorModeValue,
   Stack,
-  useColorMode,
   Center,
   Image,
 } from '@chakra-ui/react'
-import { MoonIcon, SunIcon } from '@chakra-ui/icons'
 import { FaRegBell } from 'react-icons/fa'
 import { UserInformation } from '@/types/DataModel'
 import { FiHome } from 'react-icons/fi'
-import { use, useContext } from 'react'
+import { useContext } from 'react'
 import { LoginUserContext } from '@/contexts/UserInfoContext'
 import { getCookie, deleteCookie } from 'cookies-next'
 import { useRouter } from 'next/navigation'
-import { RoomContext } from '@/contexts/RoomContext'
-
-interface Props {
-  children: React.ReactNode
-}
 
 export default function CommonHeader() {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { roomCtx, setRoomMetaInfo } = useContext(RoomContext) || {}
   const { setLoginUser } = useContext(LoginUserContext)
 
   const cookie = getCookie('loginUser')

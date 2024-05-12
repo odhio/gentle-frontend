@@ -1,5 +1,5 @@
-import { pushChatMessageEmotion } from '@/api/firebase/room'
 import { sendAudio } from '@/api/room/api'
+import { LocalDataStream } from '@skyway-sdk/core'
 import { EventEmitter } from 'events'
 
 export class AudioRecorder {
@@ -23,27 +23,29 @@ export class AudioRecorder {
     if (this._mediaRecorder == (null || undefined)) return
   }
 
-  private async _sendBlob(blob: Blob) {
+  private async _sendBlob(blob: Blob, messageId: string) {
     try {
-      const data = await sendAudio(this.dataStream, this.userId, blob)
-
-      if (data !== null || data !== undefined) {
-        const result = await pushChatMessageEmotion(
-          this._roomId,
-          this._transcriptPK,
-          data,
-        )
-        console.log(result)
-      }
+      const data = await sendAudio(
+        this.dataStream,
+        this.userId,
+        messageId,
+        blob,
+      )
       return data
     } catch (e) {
       console.error(e)
     }
   }
 
-  constructor(dataStream, roomId: string, userId: string, stream: MediaStream) {
+  constructor(
+    dataStream: LocalDataStream,
+    roomId: string,
+    userId: string,
+    stream: MediaStream,
+  ) {
     this._audioTrack = stream.getAudioTracks()
     this._audioStream = new MediaStream(this._audioTrack)
+    this._transcriptPK = ''
     this.dataStream = dataStream
     this._roomId = roomId
     this.userId = userId
@@ -76,16 +78,14 @@ export class AudioRecorder {
         this._audioChunks.push(event.data)
 
         this._audioBlob = new Blob(this._audioChunks, { type: 'audio/wav' })
-        console.log(this._audioBlob)
-
-        const data = await this._sendBlob(this._audioBlob)
-        console.log('Data emitted to analysisEnd:', data)
-
+        if (!this._transcriptPK) return
+        const data = await this._sendBlob(this._audioBlob, this._transcriptPK)
         this._eventEmitter.emit('analysisEnd', data)
 
         this._audioChunks = []
       }
     }
+
     this._mediaRecorder.onstop = () => {
       this._audioBlob = new Blob(this._audioChunks, { type: 'audio/webm' })
       this._eventEmitter.emit('recordingStopped', this._audioBlob)
@@ -99,9 +99,6 @@ export class AudioRecorder {
   }
 
   stopRecording(pk?: string) {
-    console.log('stopRecording')
-    console.log(this._mediaRecorder)
-
     if (
       this.state === 'recording' &&
       this._mediaRecorder &&
@@ -109,7 +106,6 @@ export class AudioRecorder {
     ) {
       this._transcriptPK = pk || ''
       this._mediaRecorder.stop()
-      console.log('stopRecording')
     } else {
       console.log('Recorder is not in recording state.')
     }
