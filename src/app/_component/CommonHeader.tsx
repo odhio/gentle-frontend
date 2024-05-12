@@ -37,7 +37,7 @@ export default function CommonHeader() {
 
   const handleLogout = () => {
     deleteCookie('loginUser')
-    router.push('/')
+    router.push('/login')
   }
   const showAnnouce = () => {
     onOpen()
