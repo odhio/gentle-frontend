@@ -82,7 +82,7 @@ export const RoomDetailModal = ({ isOpen, onClose, roomUuid }: Props) => {
                         </Td>
                       </Tr>
                     ))
-                  : data?.room_members.map((member) => (
+                  : data?.room_members?.map((member) => (
                       <Tr key={member.summary}>
                         <Td>{member.name}</Td>
                         <Td>{member.summary}</Td>

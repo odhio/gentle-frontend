@@ -17,16 +17,14 @@ import { useCallback, useState } from 'react'
 import { FiHome } from 'react-icons/fi'
 import { logout } from '../../auth/api/logout'
 import { useRouter } from 'next/navigation'
+import { useLoginUser } from '@/contexts/UserInfoContext'
 
-const MOCK_USER = {
-  name: 'John Doe',
-  image: '/assets/userassets/icon001.jpg',
-}
 
 export const UserProfileIcon = () => {
   const router = useRouter()
   const toast = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const {loginUser} = useLoginUser()
 
   const handleLogout = useCallback(async () => {
     setIsLoading(true)
@@ -50,6 +48,9 @@ export const UserProfileIcon = () => {
       setIsLoading(false)
     }
   }, [])
+
+  if (!loginUser) return null
+
   return (
     <Menu>
       <MenuButton
@@ -59,12 +60,12 @@ export const UserProfileIcon = () => {
         cursor={'pointer'}
         minW={0}
       >
-        <Avatar as={'span'} size={'sm'} src={MOCK_USER.image} />
+        <Avatar as={'span'} size={'sm'} src={loginUser.image} />
       </MenuButton>
       <MenuList alignItems={'center'} p={4} gap={4}>
         <Center gap={2} flexDirection={'column'}>
-          <Avatar size={'md'} src={MOCK_USER.image} />
-          <Text>{MOCK_USER.name}</Text>
+          <Avatar size={'md'} src={loginUser.image} />
+          <Text>{loginUser.name}</Text>
         </Center>
         <MenuDivider />
         <MenuItem gap={2} rounded={'md'}>
