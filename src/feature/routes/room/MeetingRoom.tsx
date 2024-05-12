@@ -41,10 +41,6 @@ const getEmotionByPublicationId = (emotions: PopoverEmotions[], publicationId: s
 
 
 export const MeetingRoom = ({ params }) => {
-    const loginUser = {
-        id: "sample",
-        name: "sample",
-    }
 
     const [localStream, setLocalStream] = useState<MediaStream>();
     //const { loginUser, setLoginUser } = useContext(LoginUserContext) || {};

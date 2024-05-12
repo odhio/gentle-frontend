@@ -76,7 +76,12 @@ export const useAudioRecorder = (props: Props) => {
       if (finalTranscript === '') return
       else {
         const message = finalTranscript
-        const messagePK = await createMessage(roomId, userId, message)
+        const body = {
+          room_uuid: roomId,
+          user_uuid: loginUser,
+          message: message,
+        }
+        const messagePK = await createMessage(body)
         if (messagePK !== null && messagePK !== undefined) {
           audioRecorder.stopRecording(messagePK)
           console.log('messagePK', messagePK)
