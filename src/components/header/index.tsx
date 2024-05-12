@@ -1,11 +1,13 @@
+'use client'
+
 import { Box, Flex, Button, Link, Stack, Image, Text } from '@chakra-ui/react'
 import { FiHome } from 'react-icons/fi'
 import { FaRegBell } from 'react-icons/fa'
 import { UserProfileIcon } from '@/features/users/routes/user-profile-icon'
-
-const isLoggedIn = false
+import { useLoginUser } from '@/contexts/UserInfoContext'
 
 export const Header = () => {
+  const { loginUser } = useLoginUser()
   return (
     <Box bg={'gray.100'} px={4}>
       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
@@ -20,7 +22,7 @@ export const Header = () => {
         <Flex alignItems={'center'}>
           <Stack direction={'row'} spacing={3}>
             <Button>{<FaRegBell />}</Button>
-            {isLoggedIn ? (
+            {loginUser ? (
               <UserProfileIcon />
             ) : (
               <Button
