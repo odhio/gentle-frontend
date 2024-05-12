@@ -51,7 +51,7 @@ export const SignUpForm = () => {
           description: '登録しました',
           status: 'success',
         })
-        router.push('/')
+        router.push('/room/history')
       } else {
         throw new Error('Sign up failed')
       }

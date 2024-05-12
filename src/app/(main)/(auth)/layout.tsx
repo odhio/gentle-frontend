@@ -13,7 +13,7 @@ export default function AuthLayout({
   const store = cookies()
   const token = store.get(AUTH_TOKEN_KEY)
   if (token) {
-    return redirect('/')
+    return redirect('/room/history')
   }
 
   return <>{children}</>
