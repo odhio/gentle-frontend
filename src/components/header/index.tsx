@@ -1,13 +1,15 @@
-'use client'
-
-import { Box, Flex, Button, Link, Stack, Image, Text } from '@chakra-ui/react'
+'use server'
+import { Box, Flex, Button, Link, Stack, Image } from '@chakra-ui/react'
 import { FiHome } from 'react-icons/fi'
 import { FaRegBell } from 'react-icons/fa'
 import { UserProfileIcon } from '@/features/users/routes/user-profile-icon'
-import { useLoginUser } from '@/contexts/UserInfoContext'
+import { auth } from '@/auth'
 
-export const Header = () => {
-  const { loginUser } = useLoginUser()
+
+export const Header = async() => {
+  const session = await auth()
+  const user = session?.user ?? null
+  
   return (
     <Box bg={'gray.100'} px={4}>
       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
@@ -16,14 +18,11 @@ export const Header = () => {
             <Image w={180} src="/asset/logo_transparent.png" alt="" />
           </Link>
         </Box>
-        <Text fontSize={'medium'} fontWeight={'bold'}>
-          参加を待っています
-        </Text>
         <Flex alignItems={'center'}>
           <Stack direction={'row'} spacing={3}>
             <Button>{<FaRegBell />}</Button>
-            {loginUser ? (
-              <UserProfileIcon />
+            {user !== null ? (
+              <UserProfileIcon user={user} />
             ) : (
               <Button
                 colorScheme="teal"

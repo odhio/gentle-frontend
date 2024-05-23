@@ -1,16 +1,10 @@
-'use client'
-
 import React from 'react'
-import { RoomProvider } from '@/contexts/RoomContext'
-import Layout from '@/app/_component/Layout'
-import { LoungeRoom } from '@/feature/routes/lounge/component/Lounge'
+import { LoungeRoom } from '@/features/lounge/routes/lounge-room'
 
-export default function Lounge() {
+export default async function Lounge() {
   return (
-    <Layout>
-      <RoomProvider>
-        <LoungeRoom />
-      </RoomProvider>
-    </Layout>
+    <>
+      <LoungeRoom/>
+    </>
   )
 }

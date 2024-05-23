@@ -38,3 +38,5 @@ next-env.d.ts
 .env
 /src/test
 
+credentials.json
+token.json

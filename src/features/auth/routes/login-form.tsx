@@ -14,8 +14,9 @@ import {
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { useForm } from 'react-hook-form'
 import { useCallback } from 'react'
-import { login } from '../api/login'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import { Image } from '@chakra-ui/react'
 
 type LoginFormData = {
   name: string
@@ -28,14 +29,16 @@ export const LoginForm = () => {
     reset,
     formState: { isValid, isSubmitting, errors },
   } = useForm<LoginFormData>()
-
   const router = useRouter()
   const toast = useToast()
 
   const onSubmit = useCallback(async (data: LoginFormData) => {
     try {
-      const response = await login(data)
-      if (response.success) {
+      const response = await signIn('credentials', {
+        redirect: false,
+        name: data.name,
+      });
+      if (response) {
         toast({
           description: 'ログインしました',
           status: 'success',
@@ -53,6 +56,10 @@ export const LoginForm = () => {
       reset()
     }
   }, [])
+
+  const googleSignin = async () => {
+    await signIn('google', {callbackUrl: '/lounge'});
+  }
 
   return (
     <Flex
@@ -81,7 +88,7 @@ export const LoginForm = () => {
         </FormControl>
         <Button
           type="submit"
-          mb={4}
+          mt={6}
           colorScheme="teal"
           disabled={!isValid || isSubmitting}
           isLoading={isSubmitting}
@@ -89,7 +96,9 @@ export const LoginForm = () => {
           ログイン
         </Button>
       </form>
-
+      <Button onClick={googleSignin} w={'fit-content'} p={0} m={'auto'}>
+        <Image src='/asset/google-sign-up.svg' alt='google oauth' _hover={{filter:'brightness(0.9)'}}></Image>
+      </Button>
       <Flex>
         <Text fontSize="xs">
           アカウントを作成する場合

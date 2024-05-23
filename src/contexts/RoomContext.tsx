@@ -1,19 +1,12 @@
+'use client'
 import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
 import { LocalDataStream } from '@skyway-sdk/core';
 import { Room } from '@skyway-sdk/room';
 
-interface RoomMetaInfo {
-  roomName?: string
-  roomDescription?: string
-  roomIcon?: string
-}
 
 type RoomContextType = {
   roomCtx: Room | null
   setRoomCtx: Dispatch<SetStateAction<Room | null>>
-
-  roomMetaInfo: RoomMetaInfo | null
-  setRoomMetaInfo: Dispatch<SetStateAction<RoomMetaInfo | null>>
 
   roomId: string | null
   setRoomId: Dispatch<SetStateAction<string | null>>
@@ -46,14 +39,10 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
   const [audioStream, setAudioStream] = useState<MediaStream>()
   const [videoStream, setVideoStream] = useState<MediaStream>()
   const [roomCtx, setRoomCtx] = useState<Room | null>(null)
-  const [roomMetaInfo, setRoomMetaInfo] = useState<RoomMetaInfo | null>(null)
 
   const value = {
     roomCtx,
     setRoomCtx,
-
-    roomMetaInfo,
-    setRoomMetaInfo,
 
     roomId,
     setRoomId,

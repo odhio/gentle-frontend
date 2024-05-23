@@ -1,9 +1,11 @@
 import React from 'react'
-
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
+import { Header } from '@/components/header'
+import { Session } from 'inspector'
+import Head from 'next/head'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,13 +16,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  session,
 }: Readonly<{
   children: React.ReactNode
+  session: Session
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <script src="https://apis.google.com/js/api.js" async defer></script>
+      </Head>
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <Providers session={session}>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   )

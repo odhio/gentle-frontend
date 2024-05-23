@@ -1,10 +1,22 @@
 'use client'
-
 import React from 'react'
-
+import { SessionProvider } from 'next-auth/react'
 import { ChakraProvider } from '@chakra-ui/react'
-import { LoginUserProvider } from '@/contexts/UserInfoContext'
+import { Session } from 'next-auth'
+import customTheme from '@/lib/chakra/theme'
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  return <ChakraProvider><LoginUserProvider>{children}</LoginUserProvider></ChakraProvider>
+export function Providers({
+  children,
+  session
+}: {
+  children: React.ReactNode,
+  session: Session
+}) {
+  return (
+    <SessionProvider session={session}>
+        <ChakraProvider theme={customTheme}>
+          {children}
+        </ChakraProvider>
+    </SessionProvider>
+  )
 }

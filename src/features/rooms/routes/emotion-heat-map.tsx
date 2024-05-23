@@ -1,10 +1,23 @@
 'use client'
 
-import { EmotionLabel } from '@/feature/routes/room/component/emotion/EmotionLabel'
-import { Flex, Tooltip, Box, Spinner, Text } from '@chakra-ui/react'
-import { useRoomList } from '../api/getRooms'
-import { useState } from 'react'
-import { RoomDetailModal } from '../components/room-detail-modal'
+import { Flex, Tooltip, Box, Spinner, Text, Heading } from '@chakra-ui/react';
+import { useRoomList } from '../api/getRooms';
+import { useState } from 'react';
+import { DogFootPrint } from '../assets/dog-foot-print';
+import { FootPrint } from '../assets/footprint';
+import { generateRangeSteps } from '@/utils/steps';
+import { DisplayGraph } from '../components/analytics/display';
+import { RoomHistory } from '../components/room-history';
+import { useSession } from 'next-auth/react';
+
+const Palette: { [key: string]: string } = {
+  happy: "#EFA000",
+  sad: "#474799",
+  anger: "#CD1F43",
+  fear: "#7B3380",
+  disgust: "#AA2763",
+  neutral: "#A3B300",
+};
 
 const format = (data: Date | string | null) => {
   if (!data) {
@@ -19,8 +32,10 @@ const format = (data: Date | string | null) => {
 }
 
 export const EmotionHeatMap = () => {
-  const { data, isLoading } = useRoomList()
-  const [roomUuid, setRoomUuid] = useState('')
+  const datetime = new Date().toLocaleString('ja-JP',{ timeZone: 'Asia/Tokyo' });
+  const date = datetime.split(' ')[0];
+  const { data, isLoading } = useRoomList();
+  const [roomUuid, setRoomUuid] = useState('');
 
   if (isLoading) {
     return (
@@ -49,43 +64,86 @@ export const EmotionHeatMap = () => {
       </Box>
     )
   }
+  const rotate = generateRangeSteps({
+    start: 80,
+    end: 120,
+    step: 20,
+    length: data.rooms.length
+  })
+  console.log(rotate);
 
   return (
-    <>
+    <Flex w={'100%'} flexDirection={'row'}>
+      <Box w={'45%'} mb={6}>
+      <Box bg={'darkgray'} h={'45px'} w={'300px'} mb={6} rounded={'md'} position={'relative'}>
+        <Heading as="h2" size="md" mb={4} color={'white'} position={'absolute'} top={'50%'} left={'50%'} transform={'translate(-50%,-50%)'}>
+          全体の振り返り
+        </Heading>
+      </Box>
+      {/*デザイン的に7日周期でDirectionをスイッチしたいかも*/}
       <Flex
-        flexDirection="column"
-        flexWrap="wrap-reverse"
-        gap={1}
-        maxWidth={'80%'}
+        flexDirection="row"
+        flexWrap="wrap"
+        gap={3}
+        mb={3}
       >
-        {data.rooms.map((room) => (
+        {data.rooms.map((room, i) => (
           <Tooltip
-            key={room.uuid}
+            key={i}
             label={
-              room.closed_at ? `${format(room.closed_at)}` + ' 終了' : '会議中'
+              room.closedAt ? `${format(room.closedAt)}` + ' 終了' : '会議中'
             }
             placement="top"
           >
             <Box
-              w={5}
-              h={5}
-              rounded="md"
-              bg="gray.100"
-              display="inline-flex"
-              alignItems="center"
-              justifyContent="center"
+              key={i}
+              _hover={{
+                cursor: 'pointer',
+                opacity: 0.6,
+              }}
               onClick={() => setRoomUuid(room.uuid)}
             >
-              <EmotionLabel emotion={room.emotion || ''} pressure={''} />
+              {date.split('/').slice(1).includes('1')?
+               (/*🐶*/
+                 <DogFootPrint
+                   key={i}
+                   fill={room.emotion ? Palette[room.emotion] : '#e5e5e5'}
+                   transform={rotate ? `rotate(${rotate[i]})` : ''} />
+               ):(
+                  <FootPrint
+                    key={i}
+                    fill={room.emotion ? Palette[room.emotion] : '#e5e5e5'}
+                    transform={rotate ? `rotate(${rotate[i]})` : ''} />
+               )
+              }
             </Box>
           </Tooltip>
         ))}
       </Flex>
-      <RoomDetailModal
-        roomUuid={roomUuid}
-        isOpen={roomUuid !== ''}
-        onClose={() => setRoomUuid('')}
-      />
-    </>
+        <Box
+          w={'100%'}
+          h={'100%'}
+          >
+       {roomUuid !== '' &&
+          <RoomHistory roomUuid={roomUuid} />
+        }
+        </Box>
+      </Box>
+      <Box w={'55%'}>
+        {roomUuid !== '' &&
+          <>
+            <Flex
+              gap={10}
+              w={'100%'}
+              h={'fit-content'}
+            >
+              <Box>
+                <DisplayGraph roomUuid={roomUuid} />
+              </Box>
+            </Flex>
+          </>
+        }
+      </Box>
+    </Flex>
   )
 }

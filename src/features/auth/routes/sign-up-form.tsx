@@ -51,7 +51,7 @@ export const SignUpForm = () => {
           description: '登録しました',
           status: 'success',
         })
-        router.push('/lounge')
+        router.push('/login')
       } else {
         throw new Error('Sign up failed')
       }
@@ -112,6 +112,7 @@ export const SignUpForm = () => {
         <Button
           type="submit"
           mb={4}
+          mt={6}
           colorScheme="teal"
           disabled={!isValid || isSubmitting}
           isLoading={isSubmitting}

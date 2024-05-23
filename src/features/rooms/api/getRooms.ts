@@ -6,7 +6,7 @@ type Room = {
   name: string
   emotion: string | null
   summary: string | null
-  closed_at: string | null
+  closedAt: string | null
 }
 
 type Response = {

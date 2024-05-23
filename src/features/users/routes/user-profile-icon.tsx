@@ -12,19 +12,15 @@ import {
   Center,
   useToast,
   Spinner,
-} from '@chakra-ui/react'
-import { useCallback, useState } from 'react'
-import { FiHome } from 'react-icons/fi'
-import { logout } from '../../auth/api/logout'
-import { useRouter } from 'next/navigation'
-import { useLoginUser } from '@/contexts/UserInfoContext'
+} from '@chakra-ui/react';
+import { useCallback, useState } from 'react';
+import { FiHome } from 'react-icons/fi';
+import { logout } from '../../auth/api/logout';
+import { signOut } from 'next-auth/react';
 
-
-export const UserProfileIcon = () => {
-  const router = useRouter()
+export const UserProfileIcon = ({user}: {user: any}) => {
   const toast = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const {loginUser} = useLoginUser()
 
   const handleLogout = useCallback(async () => {
     setIsLoading(true)
@@ -32,10 +28,10 @@ export const UserProfileIcon = () => {
       const response = await logout()
       if (response.success) {
         toast({
-          description: 'ログインしました',
+          description: 'ログアウトしました',
           status: 'success',
         })
-        router.push('/lounge')
+        signOut({callbackUrl: '/login'})
       } else {
         throw new Error('Logout failed')
       }
@@ -49,7 +45,7 @@ export const UserProfileIcon = () => {
     }
   }, [])
 
-  if (!loginUser) return null
+  if (!user) return null
 
   return (
     <Menu>
@@ -60,12 +56,12 @@ export const UserProfileIcon = () => {
         cursor={'pointer'}
         minW={0}
       >
-        <Avatar as={'span'} size={'sm'} src={loginUser.image} />
+        <Avatar as={'span'} size={'sm'} src={user.image} />
       </MenuButton>
       <MenuList alignItems={'center'} p={4} gap={4}>
         <Center gap={2} flexDirection={'column'}>
-          <Avatar size={'md'} src={loginUser.image} />
-          <Text>{loginUser.name}</Text>
+          <Avatar size={'md'} src={user.image} />
+          <Text>{user.name}</Text>
         </Center>
         <MenuDivider />
         <MenuItem gap={2} rounded={'md'}>
