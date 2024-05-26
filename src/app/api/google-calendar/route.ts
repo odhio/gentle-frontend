@@ -1,16 +1,17 @@
+import { HOST_URI } from '@/config/env';
 import axios from 'axios';
 import { google } from 'googleapis';
 import { NextRequest, NextResponse } from 'next/server';
 
 
 export async function POST(req: NextRequest) {
-    const credentials = await axios.get('http://localhost:3000/api/oauth');
+    const credentials = await axios.get(`${HOST_URI}/api/oauth`);
     const user = await credentials.data;
     
     const oauth2Client = new google.auth.OAuth2({
         clientId: process.env.GOOGLE_CLIENT_ID ,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        redirectUri: "http://localhost:3000/lounge"
+        redirectUri: `${HOST_URI}/lounge`
     });
     oauth2Client.setCredentials({ access_token: user.accessToken });
 

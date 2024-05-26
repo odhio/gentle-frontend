@@ -4,6 +4,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { login } from './features/auth/api/login';
 import { oauthMe } from './features/auth/api/oauth-me';
+import { HOST_URI } from './config/env';
 
 export const authConfig = {
   pages: {
@@ -70,6 +71,7 @@ export const authConfig = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
+          redirect_uri: `${HOST_URI}/lounge`,
           prompt: "consent",
           access_type: "offline",
           response_type: "code",

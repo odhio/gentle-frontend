@@ -2,6 +2,7 @@
 import { auth } from "@/auth"
 import {google, calendar_v3} from 'googleapis'
 import Calendar = calendar_v3.Calendar
+import { HOST_URI } from "@/config/env"
 
 export const insertCalendar =async(data:FormData)=>{ 
     const session = await auth()
@@ -11,7 +12,7 @@ export const insertCalendar =async(data:FormData)=>{
     const oauth2Client = new google.auth.OAuth2({
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        redirectUri: 'http://localhost:3000/lounge'
+        redirectUri: `${HOST_URI}/lounge`
     })
     
     const accessToken: any = session.accessToken?.accessToken
