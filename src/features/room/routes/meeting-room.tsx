@@ -1,18 +1,20 @@
 'use client';
 
 import { LocalAudioStream, LocalP2PRoomMember, LocalVideoStream, P2PRoom, RoomPublication, SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from "@skyway-sdk/room";
-import { SkyWayAuthToken, nowInSec, uuidV4 } from "@skyway-sdk/token";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { RoomContext } from "@/contexts/RoomContext";
 import { Dialog } from "@/components/Dialog";
 import { useParams, useRouter } from "next/navigation";
-import { Box, Button, Flex, Grid, GridItem, Heading, Text, Textarea, useToast } from "@chakra-ui/react";
-import { ChatIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
+import { Box, Button, Flex, Grid, GridItem, Heading, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Spinner, Text, Textarea, useToast } from "@chakra-ui/react";
+import { CloseIcon, EditIcon } from "@chakra-ui/icons";
 import { ChatSpace } from "../component/chat/ChatSpace";
 import { ChatMessage } from "@/types/types";
 import { closeRoom, joinRoom } from "@/features/room/api/room";
 import { LocalAudioDisplay } from "../component/speech/LocalAudioDisplay";
 import { useSession } from "next-auth/react";
+import { getToken } from "@/features/room/api/token";
+import { API_URL } from "@/config/env";
+import { useBeforeUnloadFunction } from "@/hooks/useBeforeUnloadFn";
 
 
 export interface PopoverEmotions {
@@ -32,15 +34,29 @@ export const MeetingRoom = () => {
     const { data: session } = useSession();
     const user = session?.user ?? undefined;
     
+    const token = useMemo(() =>{
+        const init =async()=>{
+            const token = await getToken()
+            return token
+        }
+        init()
+        }, []);
+
+
     // 入退室の遷移処理
     const params = useParams();
     const router = useRouter();
     const roomId = params.slug as string;
+    const [isClosing, setIsClosing] = useState<boolean>(false);
+
+    const closingBecon = async () => {
+       await navigator.sendBeacon(`${API_URL}/api/rooms/close/${roomId}`);
+    };
+    useBeforeUnloadFunction(closingBecon);
     
     const { dataStream, setDataStream } = useContext(RoomContext) || {};
-    const [audioStream, setAudioStream] = useState<MediaStream>();
-    const [videoStream, setVideoStream] = useState<MediaStream>();
-
+    const [ audioStream, setAudioStream ] = useState<MediaStream>();
+    const [ videoStream, setVideoStream ] = useState<MediaStream>();
 
     // 音声認識処理の制御
     const [isMediaAuthed, setIsMediaAuthed] = useState<boolean>(false);
@@ -63,72 +79,30 @@ export const MeetingRoom = () => {
     // チャットメッセージ等の管理
     const [inputMessage, setInputMessage] = useState<string>("");
     const [outputTextChat, setOutputTextChat] = useState<ChatMessage[]>([]);
-
     const [userAreaDocuments, setUserAreaDocuments] = useState<HTMLElement[]>([]);
 
+    // SkyWay
     const [room, setRoom] = useState<P2PRoom>();
     const [me, setMe] = useState<LocalP2PRoomMember>();
 
-    const appId = useMemo(() => process.env.NEXT_PUBLIC_SKYWAY_APP_ID, []);
-    const secretKey = useMemo(() => process.env.NEXT_PUBLIC_SKYWAY_SECRET_KEY, []);
-
-    const token = useMemo(() => {
-        if (appId == null || secretKey == null) return undefined;
-
-        return new SkyWayAuthToken({
-            jti: uuidV4(),
-            iat: nowInSec(),
-            exp: nowInSec() + 60 * 60 * 24,
-            scope: {
-                app: {
-                    id: appId,
-                    turn: true,
-                    actions: ["read"],
-                    channels: [
-                        {
-                            id: "*",
-                            name: "*",
-                            actions: ["write"],
-                            members: [
-                                {
-                                    id: "*",
-                                    name: "*",
-                                    actions: ["write"],
-                                    publication: {
-                                        actions: ["write"],
-                                    },
-                                    subscription: {
-                                        actions: ["write"],
-                                    },
-                                },
-                            ],
-                            sfuBots: [
-                                {
-                                    actions: ["write"],
-                                    forwardings: [
-                                        {
-                                            actions: ["write"],
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            },
-        }).encode(secretKey);
-    }, [appId, secretKey]);
-
-    // ルーム退室処理
-    const onLeave = async () => {
-
+    // ルーム退室 + タブ離脱処理
+    const leaveBeacon = async () => {
+        await navigator.sendBeacon(`${API_URL}/api/rooms/leave/${roomId}`);
+    }
+    useBeforeUnloadFunction(leaveBeacon);
+    const onLeave = (async () => {
         if (me == null || room == null) return;
         try {
             if (room.members.length == 1) {
                 if (roomId == undefined) return;
-                await closeRoom({room_uuid:roomId});
+                setIsClosing(true);
+                
+                setAudioStream(undefined);
+                
+                leaveBeacon();
                 for (const pub of me.publications) await me.unpublish(pub.id);
                 await me.leave();
+
                 setRoom(undefined);
                 setMe(undefined);
             } else {
@@ -143,9 +117,11 @@ export const MeetingRoom = () => {
         } catch (e) {
             console.error(e);
         } finally {
+            setIsClosing(false);
+            leaveBeacon();
             router.push('/lounge');
         }
-    }
+    })
 
     // データの送信処理
     const sendMessage = () => {
@@ -166,7 +142,7 @@ export const MeetingRoom = () => {
     }
 
     const onJoinChannel = useCallback(async () => {
-        
+        const token = (await getToken()).token;
         if (roomId == undefined || token == undefined || user?.uuid == undefined) return;
         const swCxt = await SkyWayContext.Create(token);
 
@@ -202,7 +178,6 @@ export const MeetingRoom = () => {
 
             // AudioStreamの配信
             const SkyWayDataStream = await SkyWayStreamFactory.createDataStream();
-            console.log(setDataStream, SkyWayDataStream)
             if (setDataStream !== undefined && SkyWayDataStream !== undefined) setDataStream(SkyWayDataStream);
 
             const myVideoInputStream = new LocalVideoStream(video.getVideoTracks()[0]);
@@ -291,7 +266,6 @@ export const MeetingRoom = () => {
     // ルーム入室時の処理
     const handler = {
         onYes: onJoinChannel,
-        // デバイスアクセスを拒否した場合ルーム選択画面に戻す
         onCancel: (() => router.push('/lounge'))
     }
 
@@ -320,14 +294,21 @@ export const MeetingRoom = () => {
                     <Dialog alertTexts={alertTexts} handler={handler} />
                 </div>
             ) : (
+                <>
+                {isClosing&&(
+                    <Modal isOpen={isClosing} onClose={() => setIsClosing(false)}>
+                        <ModalOverlay />
+                        <ModalContent>
+                            <ModalHeader>退室処理中です</ModalHeader>
+                            <ModalCloseButton />
+                            <ModalBody>
+                                <Text>しばらくお待ちください...</Text>
+                                <Spinner />
+                            </ModalBody>
+                        </ModalContent>
+                    </Modal>
+                )}
                 <div>
-                    {!information && information !== "" ? (
-                        <>
-                            
-                            <ChatIcon />
-                            <Text ml={'2rem'} fontSize='xl'>{information}</Text>
-                        </>
-                    ) : (<></>)}
                     <Grid
                         templateAreas={{
                             base: `"heading"
@@ -394,8 +375,8 @@ export const MeetingRoom = () => {
                             >
                                 <GridItem area={`"video"`}>
                                     <Box overflow={'hidden'} minW={'300px'} h={'100%'}>
-                                        <video ref={localVideoRef} autoPlay playsInline />
-                                        <audio ref={localAudioRef} autoPlay playsInline></audio>
+                                        <video ref={localVideoRef} autoPlay playsInline muted />
+                                        <audio ref={localAudioRef} autoPlay playsInline muted />
                                         <div>
                                             {user && 
                                                 (roomId !== undefined && user.uuid !== undefined && audioStream !== undefined && dataStream !== undefined) ? (
@@ -472,6 +453,7 @@ export const MeetingRoom = () => {
                         </GridItem>
                     </Grid>
                 </div>
+                </>
             )}
         </>
     );

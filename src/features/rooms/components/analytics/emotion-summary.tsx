@@ -1,16 +1,19 @@
 'use client'
 import React from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, DoughnutController } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { ChartJSModel } from '../../api/createPlot';
 import { Spinner } from '@chakra-ui/react';
 
 ChartJS.register(
-    ArcElement,
-    Tooltip,
-    Legend
+  DoughnutController,
+  ArcElement,
+  Tooltip,
+  Legend
 );
 export const options = {
+    maintainAspectRatio: false,
+    responsive: true,
     plugins: {
       legend: {
         position: 'top' as const,

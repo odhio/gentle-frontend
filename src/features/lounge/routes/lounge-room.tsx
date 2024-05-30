@@ -1,5 +1,5 @@
 'use server'
-import { Button, SimpleGrid } from '@chakra-ui/react';
+import { Button, SimpleGrid, Text } from '@chakra-ui/react';
 import { getAllRooms } from '@/features/room/api/room';
 import { Room } from '@/types/types';
 import { GetServerSideProps } from 'next';
@@ -9,6 +9,8 @@ import Link from 'next/link';
 
 export const LoungeRoom = async() => {
   const rooms:Room[] = await getAllRooms();
+  console.log(rooms);
+  
 
   return (
     <>
@@ -27,7 +29,13 @@ export const LoungeRoom = async() => {
               ))}
             </>
           ) : (
-            <></>
+            <Text
+              textAlign={'center'}
+              fontSize={'sm'}
+              color={'gray.500'}
+            >
+              表示できる会議室がありません
+              </Text>
           )}
       </SimpleGrid>
     </>

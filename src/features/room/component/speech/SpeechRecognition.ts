@@ -15,17 +15,30 @@ export class SpeechRecognitionComponent {
     this.recognition.interimResults = true
     this.recognition.continuous = true
     this.running = false
+
+    // 音声認識自体はデタッチされるまで実行し続けるようにする
     this.recognition.onend = () => {
       this.start()
     }
+
+    this.recognition.onspeechend = () => {
+      this.start()
+    }
+
     this.recognition.onstart = () => {
       if (restarter) {
         restarter()
       }
     }
 
+    this.recognition.onnomatch = (e) => {
+      console.log(`I didn't recognize that. ${e.results}`);
+    }
+
     this.recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
+        console.log(event.results[i][0].transcript);
+        
         if (event.results[i].isFinal) {
           if (this.onFinal) {
             this.onFinal(event.results[i][0].transcript)
@@ -37,19 +50,15 @@ export class SpeechRecognitionComponent {
         }
       }
     }
-    this.recognition.onend = () => {
-      if (this.onEnd) this.onEnd()
-      this.running = false
-    }
 
     this.recognition.onerror = (event) => {
       if (event.error === 'no-speech') {
         this.start()
       }
-      if (this.onError) this.onError()
       this.start()
     }
 
+    // 呼び出されたタイミングで実行
     this.start()
   }
 

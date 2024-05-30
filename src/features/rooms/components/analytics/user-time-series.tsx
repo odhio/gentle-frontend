@@ -29,6 +29,8 @@ ChartJS.register(
 );
 
 export const options: ChartOptions<'line'> = {
+    maintainAspectRatio: false,
+    responsive: true,
     plugins: {
         legend: {
             position: 'top',
@@ -37,7 +39,16 @@ export const options: ChartOptions<'line'> = {
             display: true,
             text: '発言量の推移',
         },
-    }
+    },
+    scales: {
+        x: {
+          ticks: {
+            callback: function(val, index) {
+              return index % 2 === 0 ? `${val}分` : '';
+            }
+          }
+        }
+      }
 }
 
 export const UserTimeSeries = ({data}:{data:ChartJSModel}) => {

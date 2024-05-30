@@ -1,5 +1,5 @@
+'use client'
 import { sendAudio } from '@/features/room/api/audio'
-import { LocalDataStream } from '@skyway-sdk/core'
 import { EventEmitter } from 'events'
 
 export class AudioRecorder {
@@ -7,13 +7,10 @@ export class AudioRecorder {
   private _audioChunks: Blob[]
   private _audioBlob: Blob | null
   private _transcriptPK: string
-  private _dataStream
   private _audioStream
   private _userId: string
   private _roomId: string
   private _eventEmitter: EventEmitter
-
-  state: 'inactive' | 'recording' = 'inactive'
 
   onError: () => void
   private _eventHandlers() {
@@ -34,13 +31,12 @@ export class AudioRecorder {
     }
   }
 
-  constructor(roomId: string, userId: string, dataStream:LocalDataStream, audioStream: MediaStream) {
+  constructor(roomId: string, userId: string, audioStream: MediaStream) {
     this._mediaRecorder = null
     this._audioChunks = []
     this._audioBlob = null
     this._transcriptPK = ''
     this._audioStream = audioStream
-    this._dataStream = dataStream
     this._userId = userId
     this._roomId = roomId
     this._eventEmitter = new EventEmitter()
@@ -57,7 +53,6 @@ onAnalysisEnd(listener: (data:any) => void) {
   startRecording() {
     this._audioBlob = null
     this._audioChunks = []
-    this.state = 'recording'
     this._mediaRecorder = new MediaRecorder(this._audioStream, {
       mimeType: 'audio/webm',
     })
@@ -82,7 +77,6 @@ onAnalysisEnd(listener: (data:any) => void) {
     this._mediaRecorder.onstop = () => {
       this._audioBlob = new Blob(this._audioChunks, { type: 'audio/webm' })
       this._eventEmitter.emit('recordingStopped', this._audioBlob)
-      this.state = 'inactive'
       this._audioBlob = null
     }
 
@@ -93,7 +87,6 @@ onAnalysisEnd(listener: (data:any) => void) {
 
   stopRecording(pk?: string) {
     if (
-      this.state === 'recording' &&
       this._mediaRecorder &&
       this._mediaRecorder.state === 'recording'
     ) {

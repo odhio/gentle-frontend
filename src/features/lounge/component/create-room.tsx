@@ -39,7 +39,12 @@ export const CreateRoomButton = () => {
                         placeholder="会議名を入力してください"
                         onChange={(e) => setRoomName(e.target.value)}
                     />
-                    <Button colorScheme="blue" mr={3} onClick={handleCreateRoom}>
+                    <Button
+                        colorScheme="blue"
+                        mr={3}
+                        onClick={handleCreateRoom}
+                        
+                        >
                         新規作成
                     </Button>
                     <Button variant="outline" onClick={onClose}>

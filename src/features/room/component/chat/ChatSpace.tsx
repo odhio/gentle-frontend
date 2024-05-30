@@ -15,8 +15,8 @@ export const ChatSpace = (props: Props) => {
   }
   return (
     <>
-      {chatTexts.length > 0 ? (
-        chatTexts.map((text, i) =>
+      {chatTexts.length > 0 &&
+        (chatTexts.map((text, i) =>
           text.memberId === me?.id ? (
             <Box key={i}>
               <Text size="sm" color="blue.500">
@@ -29,10 +29,6 @@ export const ChatSpace = (props: Props) => {
             </Text>
           ),
         )
-      ) : (
-        <Text size="sm" color="gray.500">
-          メッセージがありません
-        </Text>
       )}
     </>
   )

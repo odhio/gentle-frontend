@@ -21,6 +21,7 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
   }, [roomId, userId, localDataStream, localAudioStream])
 
   const [isRecording, setIsRecording] = useState(false);
+  const [ interimResults, setInterimResults  ] = useState('');
   const audioRecorderRef = useRef<AudioRecorder>();
   const speechRecognitionRef = useRef<SpeechRecognitionComponent>();
 
@@ -30,53 +31,48 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
     const audioRecorder = new AudioRecorder(
       roomId,
       userId,
-      localDataStream,
       localAudioStream
     )
     const startFunc = () => {
       setIsRecording(true)
       audioRecorder.startRecording()
-      audioRecorder.state = 'recording'
     }
 
     const speech = new SpeechRecognitionComponent(startFunc);
-    console.log('speech', speech);
-
     audioRecorder.onError = () => {}
 
-    audioRecorder.onAnalysisEnd((data:any) => {
-      if (localDataStream !== undefined && data !== undefined) {
-        localDataStream.write({
-          type: 'emotion',
-          member_id: userId,
-          emotion: data.result,
-          pressure: data.pressure,
-        })
-      } else {
-        console.log('dataStream or data is undefined:', localDataStream, data)
-      }
-    })
 
     speech.onFinal = async (finalTranscript) => {
+      console.log('finalTranscript', finalTranscript);
+      let message 
+      // 閾値の関係で最終結果だけ空の可能性もあるため、その場合はinterimResultsを使う
+      if ( finalTranscript === '' && interimResults !== '') {
+        message = interimResults
+      }else if (finalTranscript !== '') {
+        message = finalTranscript
+      }else{
+        message = '' // 何もない場合は空文字を入れてBE側で音声認識を行う（試験実装）
+      }
+
         const body = {
           room_uuid: roomId,
           user_uuid: userId,
-          message: finalTranscript,
+          message: message,
         }
         const messagePK = await createMessage(body)
         
         if (messagePK && messagePK !== undefined) {
           audioRecorder.stopRecording(messagePK)
         }
-      audioRecorder.state = 'inactive'
       setIsRecording(false)
     }
 
-    speech.onProgress = () => {
-      if (audioRecorder.state !== 'recording') {
+    speech.onProgress = (intreimTranscript) => {
+      if (!isRecording) {
         setIsRecording(true)
         audioRecorder.startRecording()
-        audioRecorder.state = 'recording'
+      }else{
+        setInterimResults(intreimTranscript)
       }
     }
 
@@ -86,7 +82,6 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
       }
     }
 
-
     audioRecorderRef.current = audioRecorder
     speechRecognitionRef.current = speech
 
@@ -94,8 +89,5 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
       audioRecorder.endRecording()
       speech.stop()
     }
-  }, [localAudioStream])
-  return (
-    <></>
-  )
+  }, [localAudioStream,localDataStream,roomId,userId,isRecording])
 }

@@ -22,7 +22,9 @@ export const Header = async() => {
           <Stack direction={'row'} spacing={3}>
             <Button>{<FaRegBell />}</Button>
             {user !== null ? (
+              <>
               <UserProfileIcon user={user} />
+              </>
             ) : (
               <Button
                 colorScheme="teal"

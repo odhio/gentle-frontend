@@ -2,7 +2,7 @@
 import { RoomDetailModal } from "@/features/lounge/component/room-detail-modal";
 import { Room } from "@/types/types";
 import { RepeatClockIcon } from "@chakra-ui/icons";
-import { Button, Card, CardBody, CardFooter, CardHeader, HStack, Heading, Text } from "@chakra-ui/react";
+import { Button, Card, CardBody, CardFooter, CardHeader, HStack, Heading, Text, VStack } from "@chakra-ui/react";
 import Link from 'next/link';
 import { useState } from "react";
 
@@ -12,6 +12,7 @@ export const RoomCard = ({ room }:{room:Room}) => {
     return (
         <>
             <Card
+                border={room?.closedAt ? '' : '1px solid #E2E8F0'}
                 bg={room?.closedAt ? 'gray.100' : 'white'}
                 p={4}
                 borderRadius="md"
@@ -31,6 +32,7 @@ export const RoomCard = ({ room }:{room:Room}) => {
                     {room.closedAt ? (
                         <>
                         <HStack
+                            maxW={'100%'}
                             spacing={4}
                             ml={'auto'}
                         >
@@ -41,28 +43,36 @@ export const RoomCard = ({ room }:{room:Room}) => {
                             px={8}
                             onClick={()=>setRoomUuid(room.uuid)}
                             >
-                            会議を振り返る
+                            会議内容
                             <RepeatClockIcon ml={3}/>
                             </Button>
                         </HStack>
                         </>
                     ) : (
-                        <HStack
+                        <VStack
                             spacing={4}
                             ml={'auto'}
                         >
-                            <Text>今日の会議を始めましょう</Text>
-                            <Link href={`/room/${room?.uuid}`} passHref>
+                            <Text
+                                fontSize="sm"
+                                color="gray.500"
+                            >今日の会議を始めましょう
+                            </Text>
+                            <Link
+                                style={{marginLeft: 'auto', width: '60%'}}
+                                href={`/room/${room?.uuid}`}
+                                passHref
+                                >
                                 <Button
                                     h={10}
+                                    w={'100%'}
                                     rounded="3xl"
-                                    colorScheme="teal"
-                                    ml={'auto'}
+                                    colorScheme="red"
                                 >
                                     参加
                                 </Button>
                             </Link>
-                        </HStack>
+                        </VStack>
                     )}
                 </CardFooter>
             </Card>

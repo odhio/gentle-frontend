@@ -10,7 +10,7 @@ interface CreateMessageResponse {
     messageUuid: string;
 }
 
-const createMessageKEY = () => '/api/messages/create/';
+const createMessageKEY = () => '/api/messages/create';
 
 export const createMessage = async (body: CreateMessageBody) => {
   const res = await client.post<CreateMessageResponse>(createMessageKEY(),body)

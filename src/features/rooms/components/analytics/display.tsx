@@ -24,16 +24,18 @@ export const DisplayGraph = ({ roomUuid }: Props) => {
             {data !== undefined ? (
                 <Flex
                     color='white'
-                    flexDirection={'row'}
+                    flexDirection={'column'}
                     flexWrap={'wrap'}
+                    margin={'auto'}
+                    w={'90%'}
                     >
-                    <Box w={'100%'} minW={'100%'} h={'300px'}>
+                    <Box w={'100%'} h={'350px'}>
                         <UserTimeSeries data={data.user_time_series} />
                     </Box>
-                    <Box w={'45%'} h={'100%'} alignContent={'stretch'}>
+                    <Box w={'100%'} h={'350px'}>
                         <EmotionTimeSeries data={data.emotion_time_series} />
                     </Box>
-                    <Box w={'45%'}>
+                    <Box w={'100%'} h={'350px'}>
                         <EmotionSummary data={data.emotion_summary} />
                     </Box>
                 </Flex>

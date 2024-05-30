@@ -1,4 +1,5 @@
 import { client } from "@/lib/api";
+import useSWR, { SWRConfiguration } from 'swr'
 import { Room } from "@/types/types";
 
 interface CloseRoomBody {
@@ -66,11 +67,10 @@ export const createRoom = async (body: CreateRoomBody):Promise<CreateRoomBody> =
   return res.data
 }
 
-export const closeRoom = async (body: CloseRoomBody):Promise<boolean> => {
+export const closeRoom = async (body: CloseRoomBody):Promise<CloseRoomResponse> => {
   const res = await client.post<CloseRoomResponse>(CloseRoomKEY(body.room_uuid))
-  if (res.status === 200) {
-    return true;
-  }else{
-    return false;
-  }
+  return res.data
 }
+
+export const useCloseRoom = (roomId:string, options?: SWRConfiguration<CloseRoomResponse>) =>
+  useSWR(CloseRoomKEY(roomId), closeRoom, options)

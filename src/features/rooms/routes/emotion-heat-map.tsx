@@ -1,14 +1,17 @@
 'use client'
 
-import { Flex, Tooltip, Box, Spinner, Text, Heading } from '@chakra-ui/react';
+import { Flex, Tooltip, Box, Spinner, Text, Heading, Button } from '@chakra-ui/react';
 import { useRoomList } from '../api/getRooms';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { DogFootPrint } from '../assets/dog-foot-print';
 import { FootPrint } from '../assets/footprint';
 import { generateRangeSteps } from '@/utils/steps';
 import { DisplayGraph } from '../components/analytics/display';
 import { RoomHistory } from '../components/room-history';
+import { useBeforeUnloadFunction } from '@/hooks/useBeforeUnloadFn';
+import { API_URL } from '@/config/env';
 import { useSession } from 'next-auth/react';
+import { getToken } from "@/features/room/api/token";
 
 const Palette: { [key: string]: string } = {
   happy: "#EFA000",
@@ -37,6 +40,7 @@ export const EmotionHeatMap = () => {
   const { data, isLoading } = useRoomList();
   const [roomUuid, setRoomUuid] = useState('');
 
+
   if (isLoading) {
     return (
       <Box
@@ -52,6 +56,7 @@ export const EmotionHeatMap = () => {
 
   if (!data || data.rooms.length === 0) {
     return (
+      <>
       <Box
         maxWidth={'80%'}
         display={'flex'}
@@ -62,6 +67,7 @@ export const EmotionHeatMap = () => {
           会議の履歴がありません
         </Text>
       </Box>
+      </>
     )
   }
   const rotate = generateRangeSteps({
@@ -70,9 +76,8 @@ export const EmotionHeatMap = () => {
     step: 20,
     length: data.rooms.length
   })
-  console.log(rotate);
-
   return (
+    <>
     <Flex w={'100%'} flexDirection={'row'}>
       <Box w={'45%'} mb={6}>
       <Box bg={'darkgray'} h={'45px'} w={'300px'} mb={6} rounded={'md'} position={'relative'}>
@@ -137,13 +142,12 @@ export const EmotionHeatMap = () => {
               w={'100%'}
               h={'fit-content'}
             >
-              <Box>
-                <DisplayGraph roomUuid={roomUuid} />
-              </Box>
+              <DisplayGraph roomUuid={roomUuid} />
             </Flex>
           </>
         }
       </Box>
     </Flex>
+    </>
   )
 }

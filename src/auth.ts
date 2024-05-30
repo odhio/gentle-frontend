@@ -7,6 +7,7 @@ import { oauthMe } from './features/auth/api/oauth-me';
 import { HOST_URI } from './config/env';
 
 export const authConfig = {
+  secret: process.env.SECRET,
   pages: {
     signIn: '/login',
     error: '/login',
@@ -71,7 +72,7 @@ export const authConfig = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
-          redirect_uri: `${HOST_URI}/lounge`,
+          redirect_uri: `${HOST_URI}/api/auth/callback/google`,
           prompt: "consent",
           access_type: "offline",
           response_type: "code",

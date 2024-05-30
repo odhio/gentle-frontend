@@ -14,9 +14,9 @@ import {
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { useForm } from 'react-hook-form'
 import { useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Image } from '@chakra-ui/react'
+import { HOST_URI } from '@/config/env'
 
 type LoginFormData = {
   name: string
@@ -29,13 +29,12 @@ export const LoginForm = () => {
     reset,
     formState: { isValid, isSubmitting, errors },
   } = useForm<LoginFormData>()
-  const router = useRouter()
   const toast = useToast()
 
   const onSubmit = useCallback(async (data: LoginFormData) => {
     try {
       const response = await signIn('credentials', {
-        redirect: false,
+        callbackUrl: `${HOST_URI}/lounge`,
         name: data.name,
       });
       if (response) {
@@ -43,7 +42,6 @@ export const LoginForm = () => {
           description: 'ログインしました',
           status: 'success',
         })
-        router.push('/lounge')
       } else {
         throw new Error('Login failed')
       }
