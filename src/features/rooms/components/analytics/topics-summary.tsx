@@ -10,8 +10,8 @@ export const TopicsSummary = ({
     tfidf: { [key: string]: number }
 }) => {
     return (
-        <Flex w={'95%'} gap={'5%'} margin={'auto'} justifyContent={'center'}>
-            <Box>
+        <Flex w={'100%'} gap={'2.5%'} margin={'auto'} justifyContent={'center'}>
+            <Box w={'50%'}>
             <Heading
                 color={'teal.600'}
                 fontWeight={'bold'}
@@ -52,16 +52,16 @@ export const TopicsSummary = ({
                         <Tbody>
                             {Object.entries(countup).map(([key, value], index) => (
                                 <Tr key={index} bg={index % 2 == 0 ? 'white' : 'gray.100'}>
-                                    <Td textAlign={'center'} color={'gray.600'}>{index + 1}</Td>
+                                    <Th textAlign={'center'} fontSize={'nd'} color={'teal.500'} >{index + 1}</Th>
                                     <Td textAlign={'center'} color={'gray.600'}>{key}</Td>
-                                    <Td textAlign={'center'} color={'gray.600'}>{value}</Td>
+                                    <Td textAlign={'center'} color={'gray.600'}>{value}回</Td>
                                 </Tr>
                             ))}
                         </Tbody>
                     </Table>
                 </TableContainer>
             </Box>
-            <Box>
+            <Box w={'50%'}>
             <Heading
                 color={'teal.600'}
                 fontWeight={'bold'}
@@ -102,7 +102,7 @@ export const TopicsSummary = ({
                         <Tbody>
                             {Object.entries(tfidf).map(([key, value], index) => (
                                 <Tr key={index} bg={index % 2 == 0 ? 'white' : 'gray.100'}>
-                                    <Td textAlign={'center'} color={'gray.600'}>{index + 1}</Td>
+                                    <Th textAlign={'center'} fontSize={'nd'} color={'teal.500'}>{index + 1}</Th>
                                     <Td textAlign={'center'} color={'gray.600'}>{key}</Td>
                                     <Td textAlign={'center'} color={'gray.600'}>{Math.floor(value*1000)/1000}</Td>
                                 </Tr>

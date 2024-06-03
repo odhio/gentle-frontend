@@ -79,7 +79,7 @@ export const DisplayGraph = ({ roomUuid }: Props) => {
                                 </Box>
                                 <Box w={'100%'} mb={'10'}>
                                     <Tabs variant='enclosed'
-                                        w={'90%'}
+                                        w={'100%'}
                                         margin={'auto'}
                                     >
                                         <TabList mb='1em'>

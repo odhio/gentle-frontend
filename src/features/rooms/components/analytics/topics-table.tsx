@@ -20,10 +20,10 @@ export const TopicTable = ({
         const secondItem = column_2[i] || { key: '-', value: '-' };
         rows.push(
             <Tr key={i} bg={i % 2 == 0 ? 'white' : 'gray.100'}>
-                <Th>{firstItem.key}</Th>
-                <Td color={'gray.600'}>{firstItem.value}</Td>
-                <Th>{secondItem.key}</Th>
-                <Td color={'gray.600'}>{secondItem.value}</Td>
+                <Th textAlign={'center'}>{firstItem.key}</Th>
+                <Td color={'gray.600'} borderRight={'1px'} borderStyle={'dotted'} borderRightColor={'teal.400'}>{firstItem.value}回</Td>
+                <Th textAlign={'center'}>{secondItem.key}</Th>
+                <Td color={'gray.600'}>{secondItem.value}回</Td>
             </Tr>
         );
     }

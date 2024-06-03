@@ -58,10 +58,10 @@ export const TopicsCombination = ({
                         {Object.keys(term_combination.col_1).length > 0 ? (
                             Object.keys(term_combination.col_1).map((key, index) => (
                                 <Tr key={index} bg={index % 2 === 0 ? 'white' : 'gray.100'}>
-                                    <Td textAlign={'center'} color={'gray.600'}>{index + 1}</Td>
+                                    <Th textAlign={'center'} fontSize={'nd'} color={'teal.500'}>{index + 1}</Th>
                                     <Td textAlign={'center'} color={'gray.600'}>{term_combination.col_1[key]}</Td>
                                     <Td textAlign={'center'} color={'gray.600'}>{term_combination.col_2[key]}</Td>
-                                    <Td textAlign={'center'} color={'gray.600'}>{term_combination.count[key]}</Td>
+                                    <Td textAlign={'center'} color={'gray.600'}>{term_combination.count[key]}回</Td>
                                 </Tr>
                             ))
                         ) : (

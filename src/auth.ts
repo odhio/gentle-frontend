@@ -25,17 +25,12 @@ export const authConfig = {
       }
     },
     async session({ session, token }:{ session: any, token: any }) {
-      token.accessToken
-      
       return {
         ...session,
         user: {
-          ...session.user,
+          name: session.user.name,
+          image: session.user.image,
           uuid: token.uuid,
-        },
-        accessToken: {
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken,
         }
       }
     },
