@@ -1,17 +1,14 @@
 'use client'
 
-import { Flex, Tooltip, Box, Spinner, Text, Heading, Button } from '@chakra-ui/react';
+import { Flex, Tooltip, Box, Spinner, Text, Heading } from '@chakra-ui/react';
 import { useRoomList } from '../api/getRooms';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { DogFootPrint } from '../assets/dog-foot-print';
 import { FootPrint } from '../assets/footprint';
 import { generateRangeSteps } from '@/utils/steps';
 import { DisplayGraph } from '../components/analytics/display';
 import { RoomHistory } from '../components/room-history';
-import { useBeforeUnloadFunction } from '@/hooks/useBeforeUnloadFn';
-import { API_URL } from '@/config/env';
-import { useSession } from 'next-auth/react';
-import { getToken } from "@/features/room/api/token";
+
 
 const Palette: { [key: string]: string } = {
   happy: "#EFA000",

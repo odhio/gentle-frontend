@@ -5,29 +5,22 @@ import { createMessage } from '@/features/room/api/message';
 import { LocalDataStream } from '@skyway-sdk/core';
 
 interface Props {
-  roomId: string;
-  userId: string;
-  localDataStream: LocalDataStream;
-  localAudioStream: MediaStream;
+  roomId: string | undefined;
+  userId: string | undefined;
+  localDataStream: LocalDataStream | undefined;
+  localAudioStream: MediaStream | undefined;
 }
 
 export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStream}: Props) => {
-  useEffect(() => {
-    if (!roomId || !userId || !localDataStream || !localAudioStream) {
-      return
-    }else{
-      console.log('AudioRecorder initialized')
-    }
-  }, [roomId, userId, localDataStream, localAudioStream])
-
   const [isRecording, setIsRecording] = useState(false);
   const [ interimResults, setInterimResults  ] = useState('');
   const audioRecorderRef = useRef<AudioRecorder>();
   const speechRecognitionRef = useRef<SpeechRecognitionComponent>();
 
   useEffect(() => {
-    if (!localAudioStream) return
-
+    if (!roomId || !userId || !localDataStream || !localAudioStream) return
+    console.log('AudioRecorder initialized');
+    
     const audioRecorder = new AudioRecorder(
       roomId,
       userId,
@@ -68,6 +61,8 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
     }
 
     speech.onProgress = (intreimTranscript) => {
+      console.log('intreimTranscript', intreimTranscript);
+      
       if (!isRecording) {
         setIsRecording(true)
         audioRecorder.startRecording()

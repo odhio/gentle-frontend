@@ -56,8 +56,10 @@ export const EmotionTimeSeries = ({data}:{data:ChartJSModel}) => {
         return <Spinner />
     }
     const labels: string[] = data.labels;
-    const datasetsList: any = data.datasets
-
+    const datasetsList: any = Array.isArray(data.datasets) ? data.datasets.map(item => {
+        return { ...item, lineTension: 0.3 };
+      }) : data.datasets;
+        
     const graphData = {
         labels,
         datasets: datasetsList,

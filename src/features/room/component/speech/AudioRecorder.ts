@@ -81,6 +81,9 @@ onAnalysisEnd(listener: (data:any) => void) {
     }
 
     if (this._mediaRecorder && this._mediaRecorder.state !== 'recording') {
+      console.log('Recorder is starting');
+      console.log(this._mediaRecorder.state);
+      
       this._mediaRecorder.start()
     }
   }

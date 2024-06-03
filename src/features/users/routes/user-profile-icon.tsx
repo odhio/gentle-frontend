@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { useCallback, useState } from 'react';
 import { FiHome } from 'react-icons/fi';
-import { logout } from '../../auth/api/logout';
+import { logout } from '@/features/auth/api/logout';
 import { signOut } from 'next-auth/react';
 
 export const UserProfileIcon = ({user}: {user: any}) => {

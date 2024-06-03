@@ -1,7 +1,7 @@
 'use client';
 
 import { LocalAudioStream, LocalP2PRoomMember, LocalVideoStream, P2PRoom, RoomPublication, SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from "@skyway-sdk/room";
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { RoomContext } from "@/contexts/RoomContext";
 import { Dialog } from "@/components/Dialog";
 import { useParams, useRouter } from "next/navigation";
@@ -9,12 +9,13 @@ import { Box, Button, Flex, Grid, GridItem, Heading, Modal, ModalBody, ModalClos
 import { CloseIcon, EditIcon } from "@chakra-ui/icons";
 import { ChatSpace } from "../component/chat/ChatSpace";
 import { ChatMessage } from "@/types/types";
-import { closeRoom, joinRoom } from "@/features/room/api/room";
+import { joinRoom } from "@/features/room/api/room";
 import { LocalAudioDisplay } from "../component/speech/LocalAudioDisplay";
 import { useSession } from "next-auth/react";
 import { getToken } from "@/features/room/api/token";
 import { API_URL } from "@/config/env";
 import { useBeforeUnloadFunction } from "@/hooks/useBeforeUnloadFn";
+import { useAudioRecorder } from "@/hooks/audio/useAudioRecorder";
 
 
 export interface PopoverEmotions {
@@ -34,25 +35,12 @@ export const MeetingRoom = () => {
     const { data: session } = useSession();
     const user = session?.user ?? undefined;
     
-    const token = useMemo(() =>{
-        const init =async()=>{
-            const token = await getToken()
-            return token
-        }
-        init()
-        }, []);
-
-
+    
     // 入退室の遷移処理
     const params = useParams();
     const router = useRouter();
     const roomId = params.slug as string;
     const [isClosing, setIsClosing] = useState<boolean>(false);
-
-    const closingBecon = async () => {
-       await navigator.sendBeacon(`${API_URL}/api/rooms/close/${roomId}`);
-    };
-    useBeforeUnloadFunction(closingBecon);
     
     const { dataStream, setDataStream } = useContext(RoomContext) || {};
     const [ audioStream, setAudioStream ] = useState<MediaStream>();
@@ -62,6 +50,7 @@ export const MeetingRoom = () => {
     const [isMediaAuthed, setIsMediaAuthed] = useState<boolean>(false);
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const localAudioRef = useRef<HTMLAudioElement>(null);
+    useAudioRecorder({roomId: roomId, userId: user?.uuid, localDataStream: dataStream, localAudioStream: audioStream});
 
     const [information, setInformation] = useState<string>();
     const toast = useToast();
@@ -86,8 +75,9 @@ export const MeetingRoom = () => {
     const [me, setMe] = useState<LocalP2PRoomMember>();
 
     // ルーム退室 + タブ離脱処理
-    const leaveBeacon = async () => {
-        await navigator.sendBeacon(`${API_URL}/api/rooms/leave/${roomId}`);
+    const leaveBeacon = () => {
+        const status = navigator.sendBeacon(`${API_URL}/api/rooms/close/${roomId}`);
+        return status;
     }
     useBeforeUnloadFunction(leaveBeacon);
     const onLeave = (async () => {
@@ -118,7 +108,6 @@ export const MeetingRoom = () => {
             console.error(e);
         } finally {
             setIsClosing(false);
-            leaveBeacon();
             router.push('/lounge');
         }
     })
@@ -144,6 +133,7 @@ export const MeetingRoom = () => {
     const onJoinChannel = useCallback(async () => {
         const token = (await getToken()).token;
         if (roomId == undefined || token == undefined || user?.uuid == undefined) return;
+
         const swCxt = await SkyWayContext.Create(token);
 
         if (swCxt) {
@@ -151,21 +141,27 @@ export const MeetingRoom = () => {
                 type: 'p2p',
                 name: roomId,
             });
-            const video = await navigator.mediaDevices.getUserMedia({ video: true });
-            const audio = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const media = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-            if (video == undefined || audio == undefined) {
+            if (media == undefined) {
                 alert("デバイスアクセスを拒否したか正常に取得できませんでした。ルーム選択画面に戻ります");
                 router.push('/lounge'); return;
             };
             setIsMediaAuthed(true);
-            setAudioStream(audio); 
-            setVideoStream(video);
+            const video = media.getVideoTracks();
+            const audio = media.getAudioTracks();
 
+            const videoStream = new MediaStream(video);
+            const audioStream = new MediaStream(audio);
+            setVideoStream(videoStream);
+            setAudioStream(audioStream);
+
+            // SkyWayのRoomに参加
             const me: LocalP2PRoomMember = await room.join({
                 name: user.uuid
             });
 
+            // BE側にルームへの参加を通知
             if (room !== undefined && me !== undefined) {
                 setRoom(room);
                 setMe(me);
@@ -180,8 +176,8 @@ export const MeetingRoom = () => {
             const SkyWayDataStream = await SkyWayStreamFactory.createDataStream();
             if (setDataStream !== undefined && SkyWayDataStream !== undefined) setDataStream(SkyWayDataStream);
 
-            const myVideoInputStream = new LocalVideoStream(video.getVideoTracks()[0]);
-            const myAudioqInputStream = new LocalAudioStream(audio.getAudioTracks()[0]);
+            const myVideoInputStream = new LocalVideoStream(video[0]);
+            const myAudioqInputStream = new LocalAudioStream(audio[0]);
             if (audio) await me.publish(myAudioqInputStream);
             if (video) await me.publish(myVideoInputStream);
 
@@ -252,7 +248,7 @@ export const MeetingRoom = () => {
                 setInformation(`メンバーが退室しました.`);
             })
         };
-    }, [token]);
+    }, []);
 
     useEffect(() => {
         if (videoStream == null || audioStream == null) return;
