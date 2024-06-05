@@ -44,8 +44,11 @@ export interface ChartMaterialResponse {
 const KEY = (roomUuid: string) => `/api/analytics/create_plot/${roomUuid}`
 
 export const getChartMaterial = async (roomUuid: string) => {
-    const { data } = await client.post<ChartMaterialResponse>(KEY(roomUuid))
-    console.log(data);
-    
-    return data
+    try {
+        const { data } = await client.post<ChartMaterialResponse>(KEY(roomUuid))
+        return data
+    } catch (e) {
+        console.error(e)
+        return undefined
+    }
 } 

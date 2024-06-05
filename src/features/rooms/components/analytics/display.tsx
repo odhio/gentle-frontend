@@ -18,6 +18,10 @@ export const DisplayGraph = ({ roomUuid }: Props) => {
     useEffect(() => {
         const fetch = async () => {
             const data = await getChartMaterial(roomUuid)
+            if (data === undefined) {
+                console.log('internal server error or message is not found');
+                // TODO:UI上エラーメッセージ表示
+            }
             return data
         }
         fetch().then(setData)
