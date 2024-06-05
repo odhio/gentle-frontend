@@ -5,30 +5,24 @@ import {
     ChartOptions,
     CategoryScale,
     LinearScale,
-    PointElement,
-    LineElement,
     Title,
     Tooltip,
     Legend,
-    LineController,
+    BarElement,
   } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { Spinner } from '@chakra-ui/react';
 
 ChartJS.register(
-    CategoryScale,
-    LineController,
-    LinearScale,
-    LineElement,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
 );
 
-export const options: ChartOptions<'line'> = {
+export const options: ChartOptions<'bar'> = {
     maintainAspectRatio: false,
     responsive: true,
     plugins: {
@@ -42,11 +36,15 @@ export const options: ChartOptions<'line'> = {
     },
     scales: {
         x: {
+          stacked: true,
           ticks: {
             callback: function(val, index) {
               return index % 2 === 0 ? `${val}分` : '';
             }
           }
+        },
+        y:{
+          stacked: true,
         }
       }
 }
@@ -66,7 +64,7 @@ export const EmotionTimeSeries = ({data}:{data:ChartJSModel}) => {
     }
     return(
     <>
-        <Chart type='line' options={options} data={graphData} />
+        <Chart type='bar' options={options} data={graphData} />
     </>
 )
 }

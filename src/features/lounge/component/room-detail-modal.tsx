@@ -18,14 +18,10 @@ import {
   Flex,
   Heading,
   Text,
-  Tooltip,
   VStack
 } from '@chakra-ui/react'
 import { useRoomDetail } from '../../rooms/api/getRoomDetail'
 import { EmotionLabel } from '@/features/room/component/emotion/EmotionLabel'
-import { CalendarIcon } from '@chakra-ui/icons'
-import { useToggle } from 'react-use'
-import { GoogleCalendarForm } from '@/features/calendar/google-calendar-form'
 
 type Props = {
   isOpen: boolean
@@ -35,7 +31,6 @@ type Props = {
 
 export const RoomDetailModal = ({ isOpen, onClose, roomUuid }: Props) => {
   const { data, isLoading } = useRoomDetail(roomUuid);
-  const [isCarendarSelected, setIsCarendarSelected] = useToggle(false);
 
   return (
     <>
@@ -48,32 +43,11 @@ export const RoomDetailModal = ({ isOpen, onClose, roomUuid }: Props) => {
             ) : (
               <Flex alignItems="center" gap={2} color={'white'}>
                 全体の雰囲気：<EmotionLabel emotion={data?.emotion || ''} pressure={''} />
-                {data?.googleSchedule ? (
-                  <>
-                    <Tooltip
-                      label={'カレンダーの登録候補があります'}
-                      placement="top"
-                    >
-                      <CalendarIcon
-                        onClick={setIsCarendarSelected}
-                      />
-                    </Tooltip>
-                  </>
-                ) : (
-                  <></>
-                )}
               </Flex>
             )}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            {isCarendarSelected && data?.googleSchedule !== (undefined || null) ? (
-              <>
-                {data?.googleSchedule &&
-                  <GoogleCalendarForm googleSchedule={data?.googleSchedule} toggle={setIsCarendarSelected} />
-                }
-              </>
-            ) : (
               <>
                 <Flex flexDirection={'column'} mb={3} gap={2}>
                   <Heading size={'md'} color={'teal'}>
@@ -164,7 +138,6 @@ export const RoomDetailModal = ({ isOpen, onClose, roomUuid }: Props) => {
                   </TableContainer>
                 </Flex>
               </>
-            )}
           </ModalBody>
         </ModalContent>
       </Modal>

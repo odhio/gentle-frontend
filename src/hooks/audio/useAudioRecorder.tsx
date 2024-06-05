@@ -14,8 +14,6 @@ interface Props {
 export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStream}: Props) => {
   const [isRecording, setIsRecording] = useState(false);
   const [ interimResults, setInterimResults  ] = useState('');
-  const audioRecorderRef = useRef<AudioRecorder>();
-  const speechRecognitionRef = useRef<SpeechRecognitionComponent>();
 
   useEffect(() => {
     if (!roomId || !userId || !localDataStream || !localAudioStream) return
@@ -32,8 +30,6 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
     }
 
     const speech = new SpeechRecognitionComponent(startFunc);
-    audioRecorder.onError = () => {}
-
 
     speech.onFinal = async (finalTranscript) => {
       console.log('finalTranscript', finalTranscript);
@@ -77,11 +73,9 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
       }
     }
 
-    audioRecorderRef.current = audioRecorder
-    speechRecognitionRef.current = speech
-
     return () => {
       audioRecorder.endRecording()
+      audioRecorder.cleanup()
       speech.stop()
     }
   }, [localAudioStream,localDataStream,roomId,userId,isRecording])

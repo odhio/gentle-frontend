@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormErrorMessage,
   useToast,
+  VStack,
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { useForm } from 'react-hook-form'
@@ -59,6 +60,10 @@ export const LoginForm = () => {
     await signIn('google', {callbackUrl: '/lounge'});
   }
 
+  const msSignin = async () => {
+    return null;
+  }
+
   return (
     <Flex
       direction="column"
@@ -94,9 +99,11 @@ export const LoginForm = () => {
           ログイン
         </Button>
       </form>
-      <Button onClick={googleSignin} w={'fit-content'} p={0} m={'auto'}>
-        <Image src='/asset/google-sign-up.svg' alt='google oauth' _hover={{filter:'brightness(0.9)'}}></Image>
+      <VStack>
+      <Button onClick={msSignin} w={'fit-content'} p={0} m={'auto'}>
+        <Image src='/asset/ms-symbollockup_signin_light.svg' alt='ms oauth' _hover={{filter:'brightness(0.9)'}}></Image>
       </Button>
+      </VStack>
       <Flex>
         <Text fontSize="xs">
           アカウントを作成する場合

@@ -16,6 +16,7 @@ import { getToken } from "@/features/room/api/token";
 import { API_URL } from "@/config/env";
 import { useBeforeUnloadFunction } from "@/hooks/useBeforeUnloadFn";
 import { useAudioRecorder } from "@/hooks/audio/useAudioRecorder";
+import { set } from "react-hook-form";
 
 
 export interface PopoverEmotions {
@@ -76,7 +77,17 @@ export const MeetingRoom = () => {
 
     // ルーム退室 + タブ離脱処理
     const leaveBeacon = () => {
+        //TODO: ルームメンバーの人数をstateで管理してここの条件分岐にも含める
         const status = navigator.sendBeacon(`${API_URL}/api/rooms/close/${roomId}`);
+        
+        setAudioStream(undefined);
+        setVideoStream(undefined);
+        videoStream?.getTracks().forEach((track) => {
+            track.stop();
+        });
+        audioStream?.getTracks().forEach((track) => {
+            track.stop();
+        });
         return status;
     }
     useBeforeUnloadFunction(leaveBeacon);
@@ -86,9 +97,6 @@ export const MeetingRoom = () => {
             if (room.members.length == 1) {
                 if (roomId == undefined) return;
                 setIsClosing(true);
-                
-                setAudioStream(undefined);
-                
                 leaveBeacon();
                 for (const pub of me.publications) await me.unpublish(pub.id);
                 await me.leave();

@@ -58,30 +58,25 @@ onAnalysisEnd(listener: (data:any) => void) {
     })
 
     this._mediaRecorder.ondataavailable = async (event: BlobEvent) => {
-      if (this._transcriptPK == '') {
-        return
-      }
+      if (this._transcriptPK == '' || !this._audioStream.active) return;
       if (event.data.size > 0) {
+        console.log('blob data available');
+        
         this._audioChunks.push(event.data)
 
         this._audioBlob = new Blob(this._audioChunks, { type: 'audio/wav' })
         if(!this._transcriptPK) return
         const data = await this._sendBlob(this._audioBlob,this._transcriptPK)
         this._eventEmitter.emit('analysisEnd', data)
+
         this._audioChunks = []
+        this._audioBlob = null
 
         return data
       }
     }
 
-    this._mediaRecorder.onstop = () => {
-      this._audioBlob = new Blob(this._audioChunks, { type: 'audio/webm' })
-      this._eventEmitter.emit('recordingStopped', this._audioBlob)
-      this._audioBlob = null
-    }
-
     if (this._mediaRecorder && this._mediaRecorder.state !== 'recording') {
-      console.log('Recorder is starting');
       console.log(this._mediaRecorder.state);
       
       this._mediaRecorder.start()
@@ -95,17 +90,16 @@ onAnalysisEnd(listener: (data:any) => void) {
     ) {
       this._transcriptPK = pk || ''
       this._mediaRecorder.stop()
-    } else {
-      console.log('Recorder is not in recording state.')
     }
   }
 
-  endRecordingOnRecognate() {
-    this._mediaRecorder?.stop()
-  }
   endRecording() {
     this._mediaRecorder?.stop()
   }
 
-  clearRecordedData() {}
+  cleanup() {
+    if (this._mediaRecorder) {
+      this._mediaRecorder.ondataavailable = null;
+    }
+  }
 }

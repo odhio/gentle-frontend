@@ -4,14 +4,6 @@ export interface DateTimeInfo {
   timeZone: string;
 };
 
-export interface CalendarEvent {
-  end: DateTimeInfo;
-  start: DateTimeInfo;
-  summary: string;
-  location: string;
-  description: string;
-}
-
 export interface UserInformation {
   uuid: string;
   name: string;

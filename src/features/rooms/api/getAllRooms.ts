@@ -1,5 +1,5 @@
 import { client } from '@/lib/api'
-import { CalendarEvent } from '@/types/types'
+
 
 type RoomMember = {
     member_uuid: string
@@ -15,7 +15,6 @@ export type RoomDetail = {
     emotion: string
     rooMembers: RoomMember[]
     closedAt: string
-    googleSchedule?: CalendarEvent | null
 };
 
 type Response = {

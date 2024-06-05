@@ -18,13 +18,15 @@ export const authConfig = {
       if (!user.name || !user.image) return false;
       const body = { name: user.name, image: user.image };
       const res = await oauthMe(body);
+      
       if (res.success) {
         return true;
       }else{
         return false;
       }
     },
-    async session({ session, token }:{ session: any, token: any }) {
+    async session({ session, token}:{ session: any, token: any}) {
+      token.accessToken
       return {
         ...session,
         user: {
@@ -35,12 +37,18 @@ export const authConfig = {
       }
     },
     async jwt({ token, user, account }) {
+      console.log('jwt', token, user, account);
+      
       if ( user ) {
         const res = await oauthMe({ name: user.name, image: user.image });
         if (res.success) {
           token.uuid = res.uuid;
         }
+        console.log(res);
+        console.log(token);
+        
       }
+      
       token.user = user;
       if (account) {
         token.accessToken = account.access_token
