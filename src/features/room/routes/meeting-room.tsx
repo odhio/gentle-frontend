@@ -4,19 +4,18 @@ import { LocalAudioStream, LocalP2PRoomMember, LocalVideoStream, P2PRoom, RoomPu
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { RoomContext } from "@/contexts/RoomContext";
 import { Dialog } from "@/components/Dialog";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Box, Button, Flex, Grid, GridItem, Heading, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Spinner, Text, Textarea, useToast } from "@chakra-ui/react";
 import { CloseIcon, EditIcon } from "@chakra-ui/icons";
 import { ChatSpace } from "../component/chat/ChatSpace";
 import { ChatMessage } from "@/types/types";
-import { joinRoom } from "@/features/room/api/room";
+import { createRoom, joinRoom } from "@/features/room/api/room";
 import { LocalAudioDisplay } from "../component/speech/LocalAudioDisplay";
 import { useSession } from "next-auth/react";
 import { getToken } from "@/features/room/api/token";
 import { API_URL } from "@/config/env";
 import { useBeforeUnloadFunction } from "@/hooks/useBeforeUnloadFn";
 import { useAudioRecorder } from "@/hooks/audio/useAudioRecorder";
-import { set } from "react-hook-form";
 
 
 export interface PopoverEmotions {
@@ -39,6 +38,10 @@ export const MeetingRoom = () => {
     
     // 入退室の遷移処理
     const params = useParams();
+    const searchParams = useSearchParams();
+    const roomName = searchParams.get('name');
+    
+
     const router = useRouter();
     const roomId = params.slug as string;
     const [isClosing, setIsClosing] = useState<boolean>(false);
@@ -138,10 +141,40 @@ export const MeetingRoom = () => {
         setInputMessage("");
     }
 
-    const onJoinChannel = useCallback(async () => {
-        const token = (await getToken()).token;
-        if (roomId == undefined || token == undefined || user?.uuid == undefined) return;
+    const cleanup = () => {
+        videoStream?.getTracks().forEach((track) => {
+            track.stop();
+        });
+        audioStream?.getTracks().forEach((track) => {
+            track.stop();
+        });
+    }
+    
 
+    const onJoinChannel = useCallback(async () => {
+        // バックエンド処理
+        if (roomId) {
+            // ホストの処理
+            if (searchParams.has('name') && roomName !== null && roomName !== '') {
+                const res = await createRoom({ room_uuid: roomId, name: roomName })
+                if (!res) {
+                    alert("ルームの作成に失敗しました。ルーム選択画面に戻ります");
+                    cleanup();
+                    router.push('/lounge');
+                }
+            }else if(searchParams.has('name') && roomName == null && roomName == ''){
+                alert("ルーム名が不正です。ルーム選択画面に戻ります");
+                cleanup();
+                router.push('/lounge');
+            }
+        }else{
+            alert("ルームIDが取得できませんでした。ルーム選択画面に戻ります");
+            cleanup();
+            router.push('/lounge');
+        }
+
+        const token = (await getToken()).token;
+        if (token == undefined || user?.uuid == undefined) return;
         const swCxt = await SkyWayContext.Create(token);
 
         if (swCxt) {

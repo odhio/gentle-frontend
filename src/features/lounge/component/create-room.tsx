@@ -1,5 +1,5 @@
 'use client'
-import { createRoom } from '@/features/room/api/room';
+
 import { AddIcon } from '@chakra-ui/icons';
 import { Button, Modal, Input, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, Box, Heading } from '@chakra-ui/react';
 import { uuidV4 } from '@skyway-sdk/token';
@@ -13,12 +13,7 @@ export const CreateRoomButton = () => {
 
     const handleCreateRoom = async () => {
         const uuid = uuidV4()
-        const pk = await createRoom({ room_uuid: uuid, name: roomName })
-        if (pk) {
-            router.push(`/room/${uuid}`)
-        } else {
-            alert('作成中にエラーが発生しました。')
-        }
+        router.push(`/room/${uuid}?name=${roomName}`)
     }
 
     return (

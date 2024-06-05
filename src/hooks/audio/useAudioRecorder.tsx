@@ -1,6 +1,6 @@
 import { AudioRecorder } from '@/features/room/component/speech/AudioRecorder';
 import { SpeechRecognitionComponent } from '@/features/room/component/speech/SpeechRecognition';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { createMessage } from '@/features/room/api/message';
 import { LocalDataStream } from '@skyway-sdk/core';
 

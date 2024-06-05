@@ -56,10 +56,6 @@ export const LoginForm = () => {
     }
   }, [])
 
-  const googleSignin = async () => {
-    await signIn('google', {callbackUrl: '/lounge'});
-  }
-
   const msSignin = async () => {
     return null;
   }
