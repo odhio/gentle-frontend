@@ -57,7 +57,9 @@ export const LoginForm = () => {
   }, [])
 
   const msSignin = async () => {
-    return null;
+    await signIn('microsoft-entra-id', {
+      callbackUrl: `${HOST_URI}/lounge`,
+    })
   }
 
   return (
