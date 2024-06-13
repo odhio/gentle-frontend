@@ -58,7 +58,6 @@ export const authConfig = {
       }
       console.log('======================================');
       console.log('token', token);
-      
       console.log('======================================');
       
       return token;
@@ -91,6 +90,7 @@ export const authConfig = {
       }
     }),
     MicrosoftEntraID({
+      // Doc: https://github.com/nextauthjs/next-auth/blob/main/packages/core/src/providers/microsoft-entra-id.ts
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
       clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
       tenantId: process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID,

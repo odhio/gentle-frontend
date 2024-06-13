@@ -5,7 +5,6 @@ import './globals.css'
 import { Providers } from './providers'
 import { Header } from '@/components/header'
 import { Session } from 'next-auth'
-import Head from 'next/head'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,10 +21,7 @@ export default function RootLayout({
   session: Session
 }>) {
   return (
-    <html lang="en">
-      <Head>
-        <script src="https://apis.google.com/js/api.js" async defer></script>
-      </Head>
+    <html>
       <body className={inter.className}>
         <Providers session={session}>
           <Header />
