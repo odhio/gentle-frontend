@@ -6,13 +6,9 @@ import { GetServerSideProps } from 'next'
 import { CreateRoomButton } from '../component/create-room'
 import { RoomCard } from '../component/room-card'
 import Link from 'next/link'
-import { auth } from '@/auth'
 
 export const LoungeRoom = async () => {
   const rooms: Room[] = await getAllRooms()
-
-  const user = await auth()
-  console.log('user:', user)
 
   return (
     <>

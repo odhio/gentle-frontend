@@ -5,13 +5,12 @@ import { FaRegBell } from 'react-icons/fa'
 import { UserProfileIcon } from '@/features/users/routes/user-profile-icon'
 import { auth } from '@/auth'
 
-
-export const Header = async() => {
+export const Header = async () => {
   const session = await auth()
   const user = session?.user ?? null
-  
+
   return (
-    <Box bg={'gray.100'} px={4}>
+    <Box bg={'gray.100'} px={4} h={'70px'}>
       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
         <Box>
           <Link href="/">
@@ -23,7 +22,7 @@ export const Header = async() => {
             <Button>{<FaRegBell />}</Button>
             {user !== null ? (
               <>
-              <UserProfileIcon user={user} />
+                <UserProfileIcon user={user} />
               </>
             ) : (
               <Button

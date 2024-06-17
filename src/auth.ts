@@ -28,21 +28,25 @@ export const authConfig = {
       return true
     },
     async redirect({ url, baseUrl }) {
+      console.log(url, baseUrl)
+
       if (url.startsWith('/')) return `${baseUrl}${url}`
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
     },
     async signIn(params) {
       const { user } = params
-      if (user) {
+      if (user.image === null) {
+        user.image = '/asset/userassets/default-icon.png'
+      }
+      const res = await oauthMe({ name: user.name, image: user.image })
+      if (user && res) {
         return true
       } else {
         return false
       }
     },
     async session({ session, token }: { session: any; token: any }) {
-      console.log(token)
-
       token.accessToken
       return {
         ...session,
@@ -67,7 +71,7 @@ export const authConfig = {
 
       if (user) {
         const res = await oauthMe({ name: user.name, image: user.image })
-        if (res.success) {
+        if (res) {
           token.uuid = res.uuid
         }
       }

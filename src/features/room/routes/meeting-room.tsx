@@ -205,6 +205,7 @@ export const MeetingRoom = () => {
           alert('ルームの作成に失敗しました。ルーム選択画面に戻ります')
           cleanup()
           router.push('/lounge')
+          return
         }
       } else if (
         searchParams.has('name') &&
@@ -214,19 +215,25 @@ export const MeetingRoom = () => {
         alert('ルーム名が不正です。ルーム選択画面に戻ります')
         cleanup()
         router.push('/lounge')
+        return
       }
     } else {
       alert('ルームIDが取得できませんでした。ルーム選択画面に戻ります')
       cleanup()
       router.push('/lounge')
+      return
     }
 
+    // ユーザ全般認証処理
     const token = (await getToken()).token
-    console.log(user?.uuid)
+    if (token == undefined || user?.uuid == undefined) {
+      alert('認証情報の取得に失敗しました。ルーム選択画面に戻ります')
+      cleanup()
+      router.push('/lounge')
+      return
+    }
 
-    if (token == undefined || user?.uuid == undefined) return
     const swCxt = await SkyWayContext.Create(token)
-
     if (swCxt) {
       const room = await SkyWayRoom.FindOrCreate(swCxt, {
         type: 'p2p',
@@ -364,6 +371,13 @@ export const MeetingRoom = () => {
           displayArea.remove()
         setInformation(`メンバーが退室しました.`)
       })
+    } else {
+      alert(
+        '通話システムの起動にエラーが発生しました。ルーム選択画面に戻ります。',
+      )
+      cleanup()
+      router.push('/lounge')
+      return
     }
   }, [])
 

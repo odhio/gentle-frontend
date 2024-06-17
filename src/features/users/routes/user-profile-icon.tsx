@@ -12,33 +12,25 @@ import {
   Center,
   useToast,
   Spinner,
-} from '@chakra-ui/react';
-import { useCallback, useState } from 'react';
-import { FiHome } from 'react-icons/fi';
-import { logout } from '@/features/auth/api/logout';
-import { signOut } from 'next-auth/react';
+} from '@chakra-ui/react'
+import { useCallback, useState } from 'react'
+import { FiHome } from 'react-icons/fi'
+import { signOut } from 'next-auth/react'
 
-export const UserProfileIcon = ({user}: {user: any}) => {
+export const UserProfileIcon = ({ user }: { user: any }) => {
   const toast = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLogout = useCallback(async () => {
     setIsLoading(true)
     try {
-      const response = await logout()
-      if (response.success) {
-        toast({
-          description: 'ログアウトしました',
-          status: 'success',
-        })
-        signOut({callbackUrl: '/login'})
-      } else {
-        throw new Error('Logout failed')
-      }
+      await signOut({ callbackUrl: '/login' })
     } catch (error) {
       toast({
-        description: 'ログアウトに失敗しました',
+        title: 'ログアウトに失敗しました',
         status: 'error',
+        duration: 9000,
+        isClosable: true,
       })
     } finally {
       setIsLoading(false)
