@@ -1,7 +1,7 @@
-
 export class SpeechRecognitionComponent {
-  recognition = new window.webkitSpeechRecognition() || new window.SpeechRecognition();
-  running:boolean;
+  recognition =
+    new window.webkitSpeechRecognition() || new window.SpeechRecognition()
+  running: boolean
 
   // eslint-disable-next-line no-unused-vars
   onFinal?: (str: string) => void
@@ -32,13 +32,13 @@ export class SpeechRecognitionComponent {
     }
 
     this.recognition.onnomatch = (e) => {
-      console.log(`I didn't recognize that. ${e.results}`);
+      console.log(`I didn't recognize that. ${e.results}`)
     }
 
     this.recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        console.log(event.results[i][0].transcript);
-        
+        console.log(event.results[i][0].transcript)
+
         if (event.results[i].isFinal) {
           if (this.onFinal) {
             this.onFinal(event.results[i][0].transcript)
@@ -74,6 +74,8 @@ export class SpeechRecognitionComponent {
   }
 
   toggle() {
+    console.log(this)
+
     if (this.running) {
       this.stop()
     } else {

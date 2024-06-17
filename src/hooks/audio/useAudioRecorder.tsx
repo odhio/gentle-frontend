@@ -1,68 +1,73 @@
-import { AudioRecorder } from '@/features/room/component/speech/AudioRecorder';
-import { SpeechRecognitionComponent } from '@/features/room/component/speech/SpeechRecognition';
-import { useEffect, useState } from 'react';
-import { createMessage } from '@/features/room/api/message';
-import { LocalDataStream } from '@skyway-sdk/core';
+import { AudioRecorder } from '@/features/room/component/speech/audio-recorder'
+import { SpeechRecognitionComponent } from '@/features/room/component/speech/speech-recognition'
+import { useEffect, useState } from 'react'
+import { createMessage } from '@/features/room/api/message'
+import { LocalDataStream } from '@skyway-sdk/core'
+import { useRecoilValue } from 'recoil'
+import { mikeEnabledState } from '@/recoil/atoms/media-atom'
 
 interface Props {
-  roomId: string | undefined;
-  userId: string | undefined;
-  localDataStream: LocalDataStream | undefined;
-  localAudioStream: MediaStream | undefined;
+  roomId: string | undefined
+  userId: string | undefined
+  localDataStream: LocalDataStream | undefined
+  localAudioStream: MediaStream | undefined
 }
 
-export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStream}: Props) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [ interimResults, setInterimResults  ] = useState('');
+export const useAudioRecorder = ({
+  roomId,
+  userId,
+  localDataStream,
+  localAudioStream,
+}: Props) => {
+  const [isRecording, setIsRecording] = useState(false)
+  const [interimResults, setInterimResults] = useState('')
+  const mikeEnabled = useRecoilValue(mikeEnabledState)
 
   useEffect(() => {
     if (!roomId || !userId || !localDataStream || !localAudioStream) return
-    console.log('AudioRecorder initialized');
-    
-    const audioRecorder = new AudioRecorder(
-      roomId,
-      userId,
-      localAudioStream
-    )
+    console.log('AudioRecorder initialized')
+
+    const audioRecorder = new AudioRecorder(roomId, userId, localAudioStream)
     const startFunc = () => {
       setIsRecording(true)
       audioRecorder.startRecording()
     }
 
-    const speech = new SpeechRecognitionComponent(startFunc);
+    const speech = new SpeechRecognitionComponent(startFunc)
 
     speech.onFinal = async (finalTranscript) => {
-      console.log('finalTranscript', finalTranscript);
-      let message 
+      if (mikeEnabled === false) return
+      console.log('finalTranscript', finalTranscript)
+      let message
       // 閾値の関係で最終結果だけ空の可能性もあるため、その場合はinterimResultsを使う
-      if ( finalTranscript === '' && interimResults !== '') {
+      if (finalTranscript === '' && interimResults !== '') {
         message = interimResults
-      }else if (finalTranscript !== '') {
+      } else if (finalTranscript !== '') {
         message = finalTranscript
-      }else{
+      } else {
         message = '' // 何もない場合は空文字を入れてBE側で音声認識を行う（試験実装）
       }
 
-        const body = {
-          room_uuid: roomId,
-          user_uuid: userId,
-          message: message,
-        }
-        const messagePK = await createMessage(body)
-        
-        if (messagePK && messagePK !== undefined) {
-          audioRecorder.stopRecording(messagePK)
-        }
+      const body = {
+        room_uuid: roomId,
+        user_uuid: userId,
+        message: message,
+      }
+      const messagePK = await createMessage(body)
+
+      if (messagePK && messagePK !== undefined) {
+        audioRecorder.stopRecording(messagePK)
+      }
       setIsRecording(false)
     }
 
     speech.onProgress = (intreimTranscript) => {
-      console.log('intreimTranscript', intreimTranscript);
-      
+      console.log('intreimTranscript', intreimTranscript)
+
       if (!isRecording) {
         setIsRecording(true)
         audioRecorder.startRecording()
-      }else{
+      } else {
         setInterimResults(intreimTranscript)
       }
     }
@@ -78,5 +83,5 @@ export const useAudioRecorder = ({roomId, userId, localDataStream, localAudioStr
       audioRecorder.cleanup()
       speech.stop()
     }
-  }, [localAudioStream,localDataStream,roomId,userId,isRecording])
+  }, [localAudioStream, localDataStream, roomId, userId, isRecording])
 }

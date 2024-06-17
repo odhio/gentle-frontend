@@ -4,19 +4,20 @@ import { SessionProvider } from 'next-auth/react'
 import { ChakraProvider } from '@chakra-ui/react'
 import { Session } from 'next-auth'
 import customTheme from '@/lib/chakra/theme'
+import { RecoilRoot } from 'recoil'
 
 export function Providers({
   children,
-  session
+  session,
 }: {
-  children: React.ReactNode,
+  children: React.ReactNode
   session: Session
 }) {
   return (
     <SessionProvider session={session}>
-        <ChakraProvider theme={customTheme}>
-          {children}
-        </ChakraProvider>
+      <RecoilRoot>
+        <ChakraProvider theme={customTheme}>{children}</ChakraProvider>
+      </RecoilRoot>
     </SessionProvider>
   )
 }
