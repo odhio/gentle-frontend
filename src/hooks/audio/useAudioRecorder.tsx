@@ -1,87 +1,84 @@
+'use client'
+import 'regenerator-runtime'
 import { AudioRecorder } from '@/features/room/component/speech/audio-recorder'
-import { SpeechRecognitionComponent } from '@/features/room/component/speech/speech-recognition'
-import { useEffect, useState } from 'react'
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from 'react-speech-recognition'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createMessage } from '@/features/room/api/message'
-import { LocalDataStream } from '@skyway-sdk/core'
 import { useRecoilValue } from 'recoil'
 import { mikeEnabledState } from '@/recoil/atoms/media-atom'
 
 interface Props {
   roomId: string | undefined
   userId: string | undefined
-  localDataStream: LocalDataStream | undefined
   localAudioStream: MediaStream | undefined
 }
 
 export const useAudioRecorder = ({
   roomId,
   userId,
-  localDataStream,
   localAudioStream,
 }: Props) => {
-  const [isRecording, setIsRecording] = useState(false)
-  const [interimResults, setInterimResults] = useState('')
   const mikeEnabled = useRecoilValue(mikeEnabledState)
+  const audioRecorder = useMemo(() => {
+    if (!roomId || !userId || !localAudioStream) return
+    return new AudioRecorder(roomId, userId, localAudioStream)
+  }, [roomId, userId, localAudioStream])
+
+  const {
+    interimTranscript,
+    finalTranscript,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition()
+  const [speechUnit, setSpeechUnit] = useState('' as string)
+  const [transcribing, setTranscribing] = useState(false)
 
   useEffect(() => {
-    if (!roomId || !userId || !localDataStream || !localAudioStream) return
-    console.log('AudioRecorder initialized')
+    console.log('useAudioRecorder: Initialize')
 
-    const audioRecorder = new AudioRecorder(roomId, userId, localAudioStream)
-    const startFunc = () => {
-      setIsRecording(true)
+    if (browserSupportsSpeechRecognition) {
+      SpeechRecognition.startListening({ continuous: true, language: 'ja-JP' })
+    } else {
+      console.error('SpeechRecognition is not supported in this browser')
+    }
+    return () => {
+      SpeechRecognition.stopListening()
+      audioRecorder?.cleanup()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!mikeEnabled || !audioRecorder) return
+    if (interimTranscript !== '' && !transcribing) {
+      setTranscribing(true)
       audioRecorder.startRecording()
+    } else if (interimTranscript === '' && transcribing) {
+      setTranscribing(false)
+      setSpeechUnit(finalTranscript)
+      resetTranscript()
+      sendResults()
     }
+  }, [interimTranscript, transcribing])
 
-    const speech = new SpeechRecognitionComponent(startFunc)
+  const sendResults = useCallback(async () => {
+    if (speechUnit === '' || roomId === undefined || userId === undefined)
+      return
+    const body = {
+      room_uuid: roomId,
+      user_uuid: userId,
+      message: speechUnit ?? '',
+    }
+    console.log('sendResults:', body)
 
-    speech.onFinal = async (finalTranscript) => {
-      if (mikeEnabled === false) return
-      console.log('finalTranscript', finalTranscript)
-      let message
-      // 閾値の関係で最終結果だけ空の可能性もあるため、その場合はinterimResultsを使う
-      if (finalTranscript === '' && interimResults !== '') {
-        message = interimResults
-      } else if (finalTranscript !== '') {
-        message = finalTranscript
+    const messageId = await createMessage(body)
+    if (audioRecorder) {
+      if (messageId) {
+        audioRecorder.stopRecording(messageId)
       } else {
-        message = '' // 何もない場合は空文字を入れてBE側で音声認識を行う（試験実装）
-      }
-
-      const body = {
-        room_uuid: roomId,
-        user_uuid: userId,
-        message: message,
-      }
-      const messagePK = await createMessage(body)
-
-      if (messagePK && messagePK !== undefined) {
-        audioRecorder.stopRecording(messagePK)
-      }
-      setIsRecording(false)
-    }
-
-    speech.onProgress = (intreimTranscript) => {
-      console.log('intreimTranscript', intreimTranscript)
-
-      if (!isRecording) {
-        setIsRecording(true)
-        audioRecorder.startRecording()
-      } else {
-        setInterimResults(intreimTranscript)
-      }
-    }
-
-    speech.onEnd = () => {
-      if (isRecording) {
         audioRecorder.stopRecording()
       }
     }
-
-    return () => {
-      audioRecorder.endRecording()
-      audioRecorder.cleanup()
-      speech.stop()
-    }
-  }, [localAudioStream, localDataStream, roomId, userId, isRecording])
+  }, [speechUnit])
 }

@@ -87,7 +87,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
                 <Button bg={'gray.800'} color={'white'}>
                   音量
                   <Image
-                    src="/asset/speaker-on.png"
+                    src="/assets/speaker-on.png"
                     alt="volume"
                     ml={2}
                     w={5}
@@ -106,7 +106,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
                 >
                   <PopoverBody h={'100%'}>
                     <Image
-                      src="/asset/speaker-on.png"
+                      src="/assets/speaker-on.png"
                       alt="volume"
                       ml={2}
                       w={5}
@@ -133,7 +133,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
                       <SliderThumb />
                     </Slider>
                     <Image
-                      src="/asset/speaker-off.png"
+                      src="/assets/speaker-off.png"
                       alt="volume"
                       ml={2}
                       w={5}
@@ -151,7 +151,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
                 <>
                   ミュート解除
                   <Image
-                    src="/asset/speaker-on.png"
+                    src="/assets/speaker-on.png"
                     alt="ミュート解除"
                     ml={2}
                     w={5}
@@ -162,7 +162,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
                 <>
                   ミュート
                   <Image
-                    src="/asset/speaker-off.png"
+                    src="/assets/speaker-off.png"
                     alt="ミュート"
                     ml={2}
                     w={5}
@@ -179,7 +179,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
               <>
                 マイクオン{' '}
                 <Image
-                  src="/asset/mike-on.png"
+                  src="/assets/mike-on.png"
                   alt="マイクオン"
                   ml={2}
                   w={5}
@@ -190,7 +190,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
               <>
                 マイクオフ{' '}
                 <Image
-                  src="/asset/mike-off.png"
+                  src="/assets/mike-off.png"
                   alt="マイクオフ"
                   ml={2}
                   w={5}
@@ -204,7 +204,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
               <>
                 カメラオフ
                 <Image
-                  src="/asset/camera-off.png"
+                  src="/assets/camera-off.png"
                   alt="カメラオフ"
                   ml={2}
                   w={5}
@@ -215,7 +215,7 @@ export const MediaController = ({ gainNode }: { gainNode: GainNode }) => {
               <>
                 カメラオン
                 <Image
-                  src="/asset/camera-on.png"
+                  src="/assests/camera-on.png"
                   alt="カメラオン"
                   ml={2}
                   w={5}

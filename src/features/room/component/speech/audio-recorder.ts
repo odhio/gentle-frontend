@@ -17,13 +17,13 @@ export class AudioRecorder {
     if (this._mediaRecorder == (null || undefined)) return
   }
 
-  private async _sendBlob(blob: Blob, messageId:string) {
+  private async _sendBlob(blob: Blob, messageId: string) {
     try {
       const body = {
         message_uuid: messageId,
         audio: blob,
       }
-    
+
       const data = await sendAudio(body)
       return data
     } catch (e) {
@@ -45,10 +45,10 @@ export class AudioRecorder {
     this.onError = () => {}
   }
 
-// eslint-disable-next-line no-unused-vars
-onAnalysisEnd(listener: (data:any) => void) {
+  // eslint-disable-next-line no-unused-vars
+  onAnalysisEnd(listener: (data: any) => void) {
     this._eventEmitter.on('analysisEnd', listener)
-}
+  }
 
   startRecording() {
     this._audioBlob = null
@@ -58,36 +58,30 @@ onAnalysisEnd(listener: (data:any) => void) {
     })
 
     this._mediaRecorder.ondataavailable = async (event: BlobEvent) => {
-      if (this._transcriptPK == '' || !this._audioStream.active) return;
+      if (this._transcriptPK == '' || !this._audioStream.active) return
       if (event.data.size > 0) {
-        console.log('blob data available');
-        
         this._audioChunks.push(event.data)
 
         this._audioBlob = new Blob(this._audioChunks, { type: 'audio/wav' })
-        if(!this._transcriptPK) return
-        const data = await this._sendBlob(this._audioBlob,this._transcriptPK)
+        if (!this._transcriptPK) return
+        const data = await this._sendBlob(this._audioBlob, this._transcriptPK)
         this._eventEmitter.emit('analysisEnd', data)
 
         this._audioChunks = []
         this._audioBlob = null
-
         return data
       }
     }
 
     if (this._mediaRecorder && this._mediaRecorder.state !== 'recording') {
-      console.log(this._mediaRecorder.state);
-      
+      console.log(this._mediaRecorder.state)
+
       this._mediaRecorder.start()
     }
   }
 
   stopRecording(pk?: string) {
-    if (
-      this._mediaRecorder &&
-      this._mediaRecorder.state === 'recording'
-    ) {
+    if (this._mediaRecorder && this._mediaRecorder.state === 'recording') {
       this._transcriptPK = pk || ''
       this._mediaRecorder.stop()
     }
@@ -99,7 +93,7 @@ onAnalysisEnd(listener: (data:any) => void) {
 
   cleanup() {
     if (this._mediaRecorder) {
-      this._mediaRecorder.ondataavailable = null;
+      this._mediaRecorder.ondataavailable = null
     }
   }
 }

@@ -10,29 +10,17 @@ export class SpeechRecognitionComponent {
   onError?: () => void
   onEnd?: () => void
 
-  constructor(restarter?: () => void) {
+  constructor() {
     this.recognition.lang = 'ja-JP'
     this.recognition.interimResults = true
     this.recognition.continuous = true
     this.running = false
 
     // 音声認識自体はデタッチされるまで実行し続けるようにする
-    this.recognition.onend = () => {
-      this.start()
-    }
-
-    this.recognition.onspeechend = () => {
-      this.start()
-    }
-
-    this.recognition.onstart = () => {
-      if (restarter) {
-        restarter()
-      }
-    }
-
-    this.recognition.onnomatch = (e) => {
-      console.log(`I didn't recognize that. ${e.results}`)
+    this.recognition.onsoundend = () => {
+      this.running = false
+      console.log('音声認識が停止しました。')
+      SpeechRecognitionComponent.prototype.start()
     }
 
     this.recognition.onresult = (event) => {
@@ -53,33 +41,34 @@ export class SpeechRecognitionComponent {
 
     this.recognition.onerror = (event) => {
       if (event.error === 'no-speech') {
+        console.log('No speech was detected. Please try again.')
         this.start()
+      } else if (event.error === 'network') {
+        console.error(
+          'Speech recognition aborted due to network error.Please check your network settings if this error continues to occur.',
+        )
+        this.start()
+      } else {
+        this.stop()
       }
-      this.start()
     }
-
-    // 呼び出されたタイミングで実行
     this.start()
   }
 
   start() {
-    if (this.running) return
-    this.running = true
-    this.recognition.start()
+    console.log('音声認識を開始します。')
+
+    if (this.running === false) {
+      this.running = true
+      console.log(this.recognition)
+      this.recognition.start()
+    }
   }
 
   stop() {
-    this.running = false
-    this.recognition.stop()
-  }
-
-  toggle() {
-    console.log(this)
-
-    if (this.running) {
-      this.stop()
-    } else {
-      this.start()
+    if (this.running === true) {
+      this.running = false
+      this.recognition.stop()
     }
   }
 }

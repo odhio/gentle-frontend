@@ -90,7 +90,6 @@ export const MeetingRoom = () => {
   useAudioRecorder({
     roomId: roomId,
     userId: user?.uuid,
-    localDataStream: dataStream,
     localAudioStream: audioStream,
   })
 
@@ -122,7 +121,8 @@ export const MeetingRoom = () => {
 
   // ルーム退室 + タブ離脱処理
   const leaveBeacon = () => {
-    if (room && room.members.length !== 1) return
+    if (me == null || room == null) return
+    if (room.members.length !== 1) return
     const status = navigator.sendBeacon(`${API_URL}/api/rooms/close/${roomId}`)
 
     setAudioStream(undefined)
@@ -195,6 +195,9 @@ export const MeetingRoom = () => {
     })
   }
 
+  const MediaContrallerMemo = useMemo(() => {
+    return <MediaController gainNode={gainNode} />
+  }, [gainNode])
   const onJoinChannel = useCallback(async () => {
     // バックエンド処理
     if (roomId) {
@@ -234,6 +237,8 @@ export const MeetingRoom = () => {
     }
 
     const swCxt = await SkyWayContext.Create(token)
+    console.log(swCxt)
+
     if (swCxt) {
       const room = await SkyWayRoom.FindOrCreate(swCxt, {
         type: 'p2p',
@@ -594,7 +599,7 @@ export const MeetingRoom = () => {
                 </Flex>
               </GridItem>
             </Grid>
-            <MediaController gainNode={gainNode} />
+            {MediaContrallerMemo}
           </div>
         </>
       )}

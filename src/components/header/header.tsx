@@ -14,7 +14,7 @@ export const Header = async () => {
       <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
         <Box>
           <Link href="/">
-            <Image w={180} src="/asset/logo_transparent.png" alt="" />
+            <Image w={180} src="/assets/logo_transparent.png" alt="" />
           </Link>
         </Box>
         <Flex alignItems={'center'}>

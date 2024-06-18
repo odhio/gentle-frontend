@@ -30,7 +30,7 @@ export const LoginForm = () => {
           mb={'15px'}
         >
           <Image
-            src="/asset/ms-symbollockup_signin_light.svg"
+            src="/assets/ms-symbollockup_signin_light.svg"
             alt="ms oauth"
             _hover={{ filter: 'brightness(0.9)' }}
           ></Image>

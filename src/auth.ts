@@ -37,7 +37,7 @@ export const authConfig = {
     async signIn(params) {
       const { user } = params
       if (user.image === null) {
-        user.image = '/asset/userassets/default-icon.png'
+        user.image = '/assets/userassets/default-icon.png'
       }
       const res = await oauthMe({ name: user.name, image: user.image })
       if (user && res) {
