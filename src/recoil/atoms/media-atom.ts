@@ -1,6 +1,6 @@
 import { atom, atomFamily } from 'recoil'
 import { MediaAtomKeys } from '../recoil-keys'
-import { MediaElements } from '../models'
+import { MediaElementsType } from '../models'
 
 export const audioTrackState = atom<MediaStreamTrack | null>({
   key: MediaAtomKeys.AUDIO_TRACK,
@@ -12,12 +12,12 @@ export const videoTrackState = atom<MediaStreamTrack | null>({
   default: null,
 })
 
-export const mediaElementsState = atomFamily<MediaElements | null, number>({
+export const mediaElementsState = atomFamily<MediaElementsType | null, string>({
   key: MediaAtomKeys.MEDIA_ELEMENTS_STATE,
   default: null,
 })
 
-export const mediaElementsIdState = atom<number[]>({
+export const mediaElementsIdState = atom<string[]>({
   key: MediaAtomKeys.MEDIA_ID_STATE,
   default: [],
 })

@@ -10,23 +10,14 @@ import {
   SkyWayRoom,
   SkyWayStreamFactory,
 } from '@skyway-sdk/room'
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import { RoomContext } from '@/contexts/RoomContext'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Dialog } from '@/components/Dialog'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import {
   Box,
   Button,
+  Container,
   Flex,
-  Grid,
-  GridItem,
   Heading,
   Modal,
   ModalBody,
@@ -49,8 +40,14 @@ import { API_URL } from '@/config/env'
 import { useBeforeUnloadFunction } from '@/hooks/useBeforeUnloadFn'
 import { useAudioRecorder } from '@/hooks/audio/useAudioRecorder'
 import { MediaController } from '../component/speech/media-controller'
-import { useSetRecoilState } from 'recoil'
-import { videoTrackState } from '@/recoil/atoms/media-atom'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import {
+  mediaElementsIdState,
+  mediaElementsState,
+  videoTrackState,
+} from '@/recoil/atoms/media-atom'
+import { localDataStreamAtom } from '@/recoil/atoms/localstream-atom'
+import { updateMediaElements } from '@/recoil/callbacks/media-callbacks'
 
 export interface PopoverEmotions {
   member: string
@@ -77,7 +74,8 @@ export const MeetingRoom = () => {
   const roomId = params.slug as string
   const [isClosing, setIsClosing] = useState<boolean>(false)
 
-  const { dataStream, setDataStream } = useContext(RoomContext) || {}
+  // メディアストリーム/メディアトラック
+  const [dataStream, setDataStream] = useRecoilState(localDataStreamAtom)
   const [audioStream, setAudioStream] = useState<MediaStream>()
   const [videoStream, setVideoStream] = useState<MediaStream>()
   const setVideoTrack = useSetRecoilState(videoTrackState)
@@ -97,6 +95,19 @@ export const MeetingRoom = () => {
   const ctx: AudioContext = useMemo(() => new AudioContext(), [])
   const gainNode: GainNode = useMemo(() => ctx.createGain(), [ctx])
 
+  // ユーザ画面
+  const {
+    addMediaElementAtom,
+    addAudioElement,
+    addVideoElement,
+    removeMediaElementAtom,
+  } = updateMediaElements()
+  const mediaElementsIds = useRecoilValue(mediaElementsIdState)
+  const mediaElementAtoms = mediaElementsIds.map((id) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useRecoilValue(mediaElementsState(id))
+  })
+
   const [information, setInformation] = useState<string>()
   const toast = useToast()
   useEffect(() => {
@@ -113,7 +124,6 @@ export const MeetingRoom = () => {
   // チャットメッセージ等の管理
   const [inputMessage, setInputMessage] = useState<string>('')
   const [outputTextChat, setOutputTextChat] = useState<ChatMessage[]>([])
-  const [userAreaDocuments, setUserAreaDocuments] = useState<HTMLElement[]>([])
 
   // SkyWay
   const [room, setRoom] = useState<P2PRoom>()
@@ -135,6 +145,7 @@ export const MeetingRoom = () => {
     })
     return status
   }
+
   useBeforeUnloadFunction(leaveBeacon)
   const onLeave = async () => {
     if (me == null || room == null) return
@@ -302,9 +313,7 @@ export const MeetingRoom = () => {
         if (publication.publisher.id === me.id) {
           return
         }
-
-        const remoteMediaArea = document.getElementById('remoteMediaArea')
-        const remoteUserArea = document.createElement('div') as HTMLDivElement
+        addMediaElementAtom(publication.id)
         const { stream } = await me.subscribe(publication.id)
         switch (stream.contentType) {
           case 'video':
@@ -314,9 +323,7 @@ export const MeetingRoom = () => {
               videoMedia.playsInline = true
               videoMedia.autoplay = true
               stream.attach(videoMedia)
-              if (remoteMediaArea != null && remoteUserArea != null) {
-                remoteUserArea.appendChild(videoMedia)
-              }
+              addVideoElement(publication.id, videoMedia)
             }
             break
           case 'audio':
@@ -326,14 +333,10 @@ export const MeetingRoom = () => {
               audioMedia.autoplay = true
               stream.attach(audioMedia)
               const source = ctx.createMediaElementSource(audioMedia)
-
+              addAudioElement(publication.id, audioMedia)
               if (gainNode && source) {
                 source.connect(gainNode)
                 gainNode.connect(ctx.destination)
-              }
-
-              if (remoteMediaArea != null && remoteUserArea != null) {
-                remoteUserArea.appendChild(audioMedia)
               }
             }
             break
@@ -351,10 +354,6 @@ export const MeetingRoom = () => {
             })
             break
         }
-        setUserAreaDocuments((prevAreas) => ({
-          ...prevAreas,
-          [publication.publisher.id]: remoteUserArea,
-        }))
       }
       room.publications.forEach(subscribeAndAttach)
       room.onStreamPublished.add((e) => subscribeAndAttach(e.publication))
@@ -374,6 +373,7 @@ export const MeetingRoom = () => {
         )
         if (displayArea !== undefined && displayArea !== null)
           displayArea.remove()
+        removeMediaElementAtom(e.member.id)
         setInformation(`メンバーが退室しました.`)
       })
     } else {
@@ -446,159 +446,96 @@ export const MeetingRoom = () => {
             </Modal>
           )}
           <div>
-            <Grid
-              templateAreas={{
-                base: `"heading"
-                        "member"
-                        "chat"
-                        "myvideo"`, // モバイル表示
-                md: `"heading member"
-                    "chat member"
-                    "myvideo member"`, // デスクトップ表示
-              }}
-              gridTemplateRows={{
-                base: '10vh 10vh 45vh 35vh', // モバイル表示
-                md: '5vh 60vh 28vh', // デスクトップ表示
-              }}
-              gridTemplateColumns={{
-                base: '100%', // モバイル表示
-                md: '75% 25%', // デスクトップ表示
-              }}
-              h="calc(100vh - 70px)"
+            <Box position={'relative'}>
+              <Button
+                position={'absolute'}
+                right={'0'}
+                w={'150px'}
+                colorScheme="red"
+                mt={2}
+                onClick={onLeave}
+              >
+                退室する
+                <CloseIcon mx={2} w={3} />
+              </Button>
+            </Box>
+            <Box>
+              <div id="chatArea">
+                {me && <ChatSpace chatTexts={outputTextChat} me={me} />}
+              </div>
+            </Box>
+            <Box overflow={'hidden'} minW={'300px'} h={'100%'}>
+              <video ref={localVideoRef} autoPlay playsInline muted />
+              <audio ref={localAudioRef} autoPlay playsInline muted />
+            </Box>
+            <Container>
+              <Textarea
+                p={'6'}
+                bg={'gray.100'}
+                value={inputMessage}
+                onChange={handleInputChange}
+                placeholder="ルームにメッセージを送信する"
+                size="md"
+                resize="none"
+                h={'100%'}
+              />
+              <Button
+                position={'absolute'}
+                zIndex={'10'}
+                bottom={'40px'}
+                right={'50px'}
+                w={'100px'}
+                colorScheme="blue"
+                mt={2}
+                onClick={sendMessage}
+                isDisabled={!inputMessage || inputMessage.length === 0}
+              >
+                送信
+                <EditIcon mx={2} />
+              </Button>
+            </Container>
+            <Flex
+              flexWrap={'wrap'}
+              color="white"
+              direction={'column'}
+              h={'100%'}
             >
-              <GridItem area={'heading'}>
-                <Grid
-                  templateAreas={`"headingItem""metaItem"`}
-                  gridTemplateRows={'1fr'}
-                  gridTemplateColumns={{
-                    base: '100%',
-                    md: '90% 10%',
-                  }}
-                >
-                  <GridItem area={'metaItem'}>
-                    <Box position={'relative'}>
-                      <Button
-                        position={'absolute'}
-                        right={'0'}
-                        w={'150px'}
-                        colorScheme="red"
-                        mt={2}
-                        onClick={onLeave}
+              <Flex>
+                <div id="remoteMediaArea">
+                  {mediaElementAtoms.map((atom, index) => {
+                    return (
+                      <div
+                        data-publication-id={atom?.publicationId}
+                        key={index}
+                        className="video-container"
+                        style={{ position: 'relative' }}
                       >
-                        退室する
-                        <CloseIcon mx={2} w={3} />
-                      </Button>
-                    </Box>
-                  </GridItem>
-                </Grid>
-              </GridItem>
-              <GridItem area={'chat'} w={'100%'}>
-                <Box h={'95%'} my={1} mx={3} p={3}>
-                  <div id="chatArea">
-                    {me && <ChatSpace chatTexts={outputTextChat} me={me} />}
-                  </div>
-                </Box>
-              </GridItem>
-              <GridItem area={'myvideo'}>
-                <Grid
-                  templateAreas={`"video inputChat"`}
-                  gridTemplateRows={'100%'}
-                  gridTemplateColumns={'25% 75%'}
-                  h={'100%'}
-                >
-                  <GridItem area={`"video"`}>
-                    <Box overflow={'hidden'} minW={'300px'} h={'100%'}>
-                      <video ref={localVideoRef} autoPlay playsInline muted />
-                      <audio ref={localAudioRef} autoPlay playsInline muted />
-                    </Box>
-                  </GridItem>
-                  <GridItem
-                    area={`"inputChat"`}
-                    position={'relative'}
-                    w={'90%'}
-                    h={'90%'}
-                    m={'auto'}
-                    bg={'gray.50'}
-                  >
-                    <Textarea
-                      p={'6'}
-                      bg={'gray.100'}
-                      value={inputMessage}
-                      onChange={handleInputChange}
-                      placeholder="ルームにメッセージを送信する"
-                      size="md"
-                      resize="none"
-                      h={'100%'}
-                    />
-                    <Button
-                      position={'absolute'}
-                      zIndex={'10'}
-                      bottom={'40px'}
-                      right={'50px'}
-                      w={'100px'}
-                      colorScheme="blue"
-                      mt={2}
-                      onClick={sendMessage}
-                      isDisabled={!inputMessage || inputMessage.length === 0}
-                    >
-                      送信
-                      <EditIcon mx={2} />
-                    </Button>
-                  </GridItem>
-                </Grid>
-              </GridItem>
-              <GridItem area={'member'}>
-                <Flex
-                  flexWrap={'wrap'}
-                  color="white"
-                  direction={'column'}
-                  h={'100%'}
-                >
-                  <div className="videoBox">
-                    <div id="remoteMediaArea">
-                      {Object.keys(userAreaDocuments).map((publicationId) => {
-                        const remoteUserArea =
-                          userAreaDocuments[publicationId as any]
-                        return (
-                          <div
-                            data-publication-id={publicationId}
-                            key={publicationId}
-                            className="video-container"
-                            style={{ position: 'relative' }}
-                          >
-                            {userAreaDocuments[publicationId as any] && (
-                              <div
-                                className="popup"
-                                style={{
-                                  position: 'absolute',
-                                  top: '0',
-                                  left: '-15px',
-                                  margin: '0',
-                                  color: 'white',
-                                  padding: '5px',
-                                  zIndex: 10,
-                                }}
-                              ></div>
-                            )}
-                            <div>
-                              {remoteUserArea && (
-                                <div
-                                  ref={(node) => {
-                                    if (node && remoteUserArea) {
-                                      node.appendChild(remoteUserArea)
-                                    }
-                                  }}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </Flex>
-              </GridItem>
-            </Grid>
+                        {atom?.videoElement && atom?.audioElement ? (
+                          <>
+                            <div
+                              ref={(node) => {
+                                if (node && atom.videoElement) {
+                                  node.appendChild(atom.videoElement)
+                                }
+                              }}
+                            />
+                            <div
+                              ref={(node) => {
+                                if (node && atom.videoElement) {
+                                  node.appendChild(atom.audioElement)
+                                }
+                              }}
+                            />
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </Flex>
+            </Flex>
             {MediaContrallerMemo}
           </div>
         </>
