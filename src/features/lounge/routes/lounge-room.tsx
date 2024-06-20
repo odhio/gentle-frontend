@@ -9,7 +9,6 @@ import Link from 'next/link'
 
 export const LoungeRoom = async () => {
   const rooms: Room[] = await getAllRooms()
-
   return (
     <>
       <CreateRoomButton />

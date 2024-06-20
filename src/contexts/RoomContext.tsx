@@ -1,24 +1,19 @@
 'use client'
-import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
-import { LocalDataStream } from '@skyway-sdk/core';
-import { Room } from '@skyway-sdk/room';
+import { LocalDataStream, LocalP2PRoomMember } from '@skyway-sdk/room'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from 'react'
 
-
+// Recoilで管理しようとしたら読み取り専用プロパティにも書き込みアクセスしたので一旦こちらに移してます
 type RoomContextType = {
-  roomCtx: Room | null
-  setRoomCtx: Dispatch<SetStateAction<Room | null>>
-
-  roomId: string | null
-  setRoomId: Dispatch<SetStateAction<string | null>>
-
-  dataStream: LocalDataStream | undefined
-  setDataStream: Dispatch<SetStateAction<LocalDataStream | undefined>>
-
-  audioStream: MediaStream | undefined
-  setAudioStream: Dispatch<SetStateAction<MediaStream | undefined>>
-
-  videoStream: MediaStream | undefined
-  setVideoStream: Dispatch<SetStateAction<MediaStream | undefined>>
+  me: LocalP2PRoomMember | null
+  setMe: Dispatch<SetStateAction<LocalP2PRoomMember | null>>
+  localDataStream: LocalDataStream | null
+  setLocalDataStream: Dispatch<SetStateAction<LocalDataStream | null>>
 }
 
 export const RoomContext = createContext<RoomContextType | undefined>(undefined)
@@ -34,27 +29,15 @@ export const useRoom = () => {
 export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [roomId, setRoomId] = useState<string | null>(null)
-  const [dataStream, setDataStream] = useState<LocalDataStream>()
-  const [audioStream, setAudioStream] = useState<MediaStream>()
-  const [videoStream, setVideoStream] = useState<MediaStream>()
-  const [roomCtx, setRoomCtx] = useState<Room | null>(null)
+  const [me, setMe] = useState<LocalP2PRoomMember | null>(null)
+  const [localDataStream, setLocalDataStream] =
+    useState<LocalDataStream | null>(null)
 
   const value = {
-    roomCtx,
-    setRoomCtx,
-
-    roomId,
-    setRoomId,
-
-    audioStream,
-    setAudioStream,
-
-    videoStream,
-    setVideoStream,
-
-    dataStream,
-    setDataStream,
+    me: me,
+    setMe: setMe,
+    localDataStream: localDataStream,
+    setLocalDataStream: setLocalDataStream,
   }
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>

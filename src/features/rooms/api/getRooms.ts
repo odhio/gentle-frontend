@@ -1,3 +1,4 @@
+'use client'
 import { client } from '@/lib/api'
 import useSWR, { SWRConfiguration } from 'swr'
 

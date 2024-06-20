@@ -16,7 +16,6 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import {
   Box,
   Button,
-  Container,
   Flex,
   Heading,
   Modal,
@@ -27,39 +26,26 @@ import {
   ModalOverlay,
   Spinner,
   Text,
-  Textarea,
   useToast,
 } from '@chakra-ui/react'
-import { CloseIcon, EditIcon } from '@chakra-ui/icons'
-import { ChatSpace } from '../component/chat/ChatSpace'
-import { ChatMessage } from '@/types/types'
+import { CloseIcon } from '@chakra-ui/icons'
 import { createRoom, joinRoom } from '@/features/room/api/room'
 import { useSession } from 'next-auth/react'
 import { getToken } from '@/features/room/api/token'
 import { API_URL } from '@/config/env'
 import { useBeforeUnloadFunction } from '@/hooks/useBeforeUnloadFn'
 import { useAudioRecorder } from '@/hooks/audio/useAudioRecorder'
-import { MediaController } from '../component/speech/media-controller'
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import {
-  mediaElementsIdState,
-  mediaElementsState,
-  videoTrackState,
+  audioEnabledState,
+  participantsState,
+  videoEnabledState,
+  volumeState,
 } from '@/recoil/atoms/media-atom'
-import { localDataStreamAtom } from '@/recoil/atoms/localstream-atom'
-import { updateMediaElements } from '@/recoil/callbacks/media-callbacks'
-
-export interface PopoverEmotions {
-  member: string
-  emotion: string
-  pressure: string
-}
-
-interface ChatDataStreams {
-  memberId: string
-  memberName: string
-  message: string
-}
+import { ChatMessage } from '@/recoil/models'
+import { ControlBar } from '../component/control-bar'
+import { useRoom } from '@/contexts/RoomContext'
+import { updateTextState } from '@/recoil/callbacks/datastream-callback'
 
 export const MeetingRoom = () => {
   const { data: session } = useSession()
@@ -75,11 +61,23 @@ export const MeetingRoom = () => {
   const [isClosing, setIsClosing] = useState<boolean>(false)
 
   // メディアストリーム/メディアトラック
-  const [dataStream, setDataStream] = useRecoilState(localDataStreamAtom)
   const [audioStream, setAudioStream] = useState<MediaStream>()
   const [videoStream, setVideoStream] = useState<MediaStream>()
-  const setVideoTrack = useSetRecoilState(videoTrackState)
-  const setAudioTrack = useSetRecoilState(videoTrackState)
+  const [videoTrack, setVideoTrack] = useState<MediaStreamTrack>()
+  const [audioTrack, setAudioTrack] = useState<MediaStreamTrack>()
+  const setParticipantsState = useSetRecoilState(participantsState)
+  const videoEnabled = useRecoilValue(videoEnabledState)
+  const audioEnabled = useRecoilValue(audioEnabledState)
+  useEffect(() => {
+    if (!videoTrack) return
+    console.log('videoTrack', videoTrack)
+    videoEnabled ? (videoTrack.enabled = true) : (videoTrack.enabled = false)
+  }, [videoEnabled, videoTrack])
+  useEffect(() => {
+    if (!audioTrack) return
+    console.log('audioTrack', audioTrack)
+    audioEnabled ? (audioTrack.enabled = true) : (audioTrack.enabled = false)
+  }, [audioEnabled, audioTrack])
 
   // 音声認識処理の制御
   const [isMediaAuthed, setIsMediaAuthed] = useState<boolean>(false)
@@ -94,19 +92,14 @@ export const MeetingRoom = () => {
   // 音声操作用
   const ctx: AudioContext = useMemo(() => new AudioContext(), [])
   const gainNode: GainNode = useMemo(() => ctx.createGain(), [ctx])
+  const volume = useRecoilValue(volumeState)
+  useEffect(() => {
+    console.log('volume', gainNode)
+    gainNode.gain.value = volume
+  }, [volume, gainNode])
 
   // ユーザ画面
-  const {
-    addMediaElementAtom,
-    addAudioElement,
-    addVideoElement,
-    removeMediaElementAtom,
-  } = updateMediaElements()
-  const mediaElementsIds = useRecoilValue(mediaElementsIdState)
-  const mediaElementAtoms = mediaElementsIds.map((id) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useRecoilValue(mediaElementsState(id))
-  })
+  const [userAreaDocuments, setUserAreaDocuments] = useState<HTMLElement[]>([])
 
   const [information, setInformation] = useState<string>()
   const toast = useToast()
@@ -119,30 +112,31 @@ export const MeetingRoom = () => {
         isClosable: true,
       })
     }
-  }, [information])
+  }, [information, toast])
 
-  // チャットメッセージ等の管理
-  const [inputMessage, setInputMessage] = useState<string>('')
-  const [outputTextChat, setOutputTextChat] = useState<ChatMessage[]>([])
+  // チャット受信処理
+  const { addText } = updateTextState()
 
   // SkyWay
   const [room, setRoom] = useState<P2PRoom>()
-  const [me, setMe] = useState<LocalP2PRoomMember>()
+  const { me, setMe, setLocalDataStream } = useRoom()
 
   // ルーム退室 + タブ離脱処理
   const leaveBeacon = () => {
     if (me == null || room == null) return
     if (room.members.length !== 1) return
     const status = navigator.sendBeacon(`${API_URL}/api/rooms/close/${roomId}`)
-
-    setAudioStream(undefined)
-    setVideoStream(undefined)
     videoStream?.getTracks().forEach((track) => {
       track.stop()
+
+      console.log('videoTrack', videoTrack)
     })
     audioStream?.getTracks().forEach((track) => {
       track.stop()
     })
+    console.log('audioTrack', audioTrack)
+    console.log('videoTrack', videoTrack)
+
     return status
   }
 
@@ -158,7 +152,7 @@ export const MeetingRoom = () => {
         await me.leave()
 
         setRoom(undefined)
-        setMe(undefined)
+        setMe(null)
       } else {
         console.log('Failed to announce room leave')
       }
@@ -167,34 +161,13 @@ export const MeetingRoom = () => {
       }
       await me.leave()
       setRoom(undefined)
-      setMe(undefined)
+      setMe(null)
     } catch (e) {
       console.error(e)
     } finally {
       setIsClosing(false)
       router.push('/lounge')
     }
-  }
-
-  // データの送信処理
-  const sendMessage = () => {
-    if (dataStream == (null || undefined)) return
-    setOutputTextChat((prev) => [
-      ...prev,
-      {
-        memberId: me?.id,
-        memberName: user?.name ?? '名無し',
-        message: inputMessage,
-      } as ChatMessage,
-    ])
-
-    dataStream.write({
-      memberId: me?.id ?? '',
-      memberName: user?.name ?? '名無し',
-      type: 'text',
-      message: inputMessage,
-    })
-    setInputMessage('')
   }
 
   const cleanup = () => {
@@ -206,9 +179,6 @@ export const MeetingRoom = () => {
     })
   }
 
-  const MediaContrallerMemo = useMemo(() => {
-    return <MediaController gainNode={gainNode} />
-  }, [gainNode])
   const onJoinChannel = useCallback(async () => {
     // バックエンド処理
     if (roomId) {
@@ -248,8 +218,6 @@ export const MeetingRoom = () => {
     }
 
     const swCxt = await SkyWayContext.Create(token)
-    console.log(swCxt)
-
     if (swCxt) {
       const room = await SkyWayRoom.FindOrCreate(swCxt, {
         type: 'p2p',
@@ -272,6 +240,9 @@ export const MeetingRoom = () => {
 
       const _video = media.getVideoTracks()
       const _audio = media.getAudioTracks()
+      console.log('video', _video[0])
+      console.log('audio', _audio[0])
+
       setVideoTrack(_video[0])
       setAudioTrack(_audio[0])
 
@@ -298,8 +269,8 @@ export const MeetingRoom = () => {
 
       // AudioStreamの配信
       const SkyWayDataStream = await SkyWayStreamFactory.createDataStream()
-      if (setDataStream !== undefined && SkyWayDataStream !== undefined)
-        setDataStream(SkyWayDataStream)
+      if (setLocalDataStream !== undefined && SkyWayDataStream !== undefined)
+        setLocalDataStream(SkyWayDataStream)
 
       const myVideoInputStream = new LocalVideoStream(_video[0])
       const myAudioqInputStream = new LocalAudioStream(_audio[0])
@@ -313,7 +284,9 @@ export const MeetingRoom = () => {
         if (publication.publisher.id === me.id) {
           return
         }
-        addMediaElementAtom(publication.id)
+
+        const remoteMediaArea = document.getElementById('remoteMediaArea')
+        const remoteUserArea = document.createElement('div') as HTMLDivElement
         const { stream } = await me.subscribe(publication.id)
         switch (stream.contentType) {
           case 'video':
@@ -322,38 +295,41 @@ export const MeetingRoom = () => {
                 document.createElement('video')
               videoMedia.playsInline = true
               videoMedia.autoplay = true
+              videoMedia.muted = true
               stream.attach(videoMedia)
-              addVideoElement(publication.id, videoMedia)
+              if (remoteMediaArea != null && remoteUserArea != null) {
+                remoteUserArea.appendChild(videoMedia)
+              }
             }
             break
           case 'audio':
             {
               const audioMedia: HTMLAudioElement =
                 document.createElement('audio')
+              audioMedia.controls = false
               audioMedia.autoplay = true
               stream.attach(audioMedia)
               const source = ctx.createMediaElementSource(audioMedia)
-              addAudioElement(publication.id, audioMedia)
-              if (gainNode && source) {
-                source.connect(gainNode)
-                gainNode.connect(ctx.destination)
+              source.connect(gainNode)
+              gainNode.connect(ctx.destination)
+              console.log('gain', gainNode.gain.value)
+
+              if (remoteMediaArea != null && remoteUserArea != null) {
+                remoteUserArea.appendChild(audioMedia)
               }
             }
             break
           case 'data':
             stream.onData.add((data) => {
-              const chat = data as ChatDataStreams
-              setOutputTextChat((prev) => [
-                ...prev,
-                {
-                  memberId: chat['memberId'],
-                  memberName: chat['memberName'] ?? '',
-                  message: chat['message'],
-                },
-              ])
+              const chat = data as ChatMessage
+              addText(chat['memberId'], chat['memberName'], chat['message'])
             })
             break
         }
+        setUserAreaDocuments((prevAreas) => ({
+          ...prevAreas,
+          [publication.publisher.id]: remoteUserArea,
+        }))
       }
       room.publications.forEach(subscribeAndAttach)
       room.onStreamPublished.add((e) => subscribeAndAttach(e.publication))
@@ -361,6 +337,7 @@ export const MeetingRoom = () => {
       // メンバーが入室した際の処理
       room.onMemberJoined.once(() => {
         setInformation(`メンバーが入室しました.`)
+        setParticipantsState(room.members.length)
       })
 
       // メンバーが退室した際の処理
@@ -373,7 +350,6 @@ export const MeetingRoom = () => {
         )
         if (displayArea !== undefined && displayArea !== null)
           displayArea.remove()
-        removeMediaElementAtom(e.member.id)
         setInformation(`メンバーが退室しました.`)
       })
     } else {
@@ -415,131 +391,109 @@ export const MeetingRoom = () => {
     }
   }, [audioStream, videoStream])
 
-  const handleInputChange = (event: {
-    target: { value: React.SetStateAction<string> }
-  }) => {
-    setInputMessage(event.target.value)
+  if (!isMediaAuthed) {
+    return (
+      <div>
+        <Heading
+          color={'white'}
+          textAlign="center"
+          size="lg"
+          my={10}
+          fontSize="30px"
+        >
+          入室待機中...
+        </Heading>
+        <Dialog alertTexts={alertTexts} handler={handler} />
+      </div>
+    )
   }
 
   return (
     <>
-      {!isMediaAuthed ? (
-        <div>
-          <Heading textAlign="center" size="lg" my={10} fontSize="30px">
-            入室待機中...
-          </Heading>
-          <Dialog alertTexts={alertTexts} handler={handler} />
-        </div>
-      ) : (
-        <>
-          {isClosing && (
-            <Modal isOpen={isClosing} onClose={() => setIsClosing(false)}>
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>退室処理中です</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                  <Text>しばらくお待ちください...</Text>
-                  <Spinner />
-                </ModalBody>
-              </ModalContent>
-            </Modal>
-          )}
-          <div>
-            <Box position={'relative'}>
-              <Button
-                position={'absolute'}
-                right={'0'}
-                w={'150px'}
-                colorScheme="red"
-                mt={2}
-                onClick={onLeave}
-              >
-                退室する
-                <CloseIcon mx={2} w={3} />
-              </Button>
-            </Box>
-            <Box>
-              <div id="chatArea">
-                {me && <ChatSpace chatTexts={outputTextChat} me={me} />}
-              </div>
-            </Box>
-            <Box overflow={'hidden'} minW={'300px'} h={'100%'}>
-              <video ref={localVideoRef} autoPlay playsInline muted />
-              <audio ref={localAudioRef} autoPlay playsInline muted />
-            </Box>
-            <Container>
-              <Textarea
-                p={'6'}
-                bg={'gray.100'}
-                value={inputMessage}
-                onChange={handleInputChange}
-                placeholder="ルームにメッセージを送信する"
-                size="md"
-                resize="none"
-                h={'100%'}
-              />
-              <Button
-                position={'absolute'}
-                zIndex={'10'}
-                bottom={'40px'}
-                right={'50px'}
-                w={'100px'}
-                colorScheme="blue"
-                mt={2}
-                onClick={sendMessage}
-                isDisabled={!inputMessage || inputMessage.length === 0}
-              >
-                送信
-                <EditIcon mx={2} />
-              </Button>
-            </Container>
-            <Flex
-              flexWrap={'wrap'}
-              color="white"
-              direction={'column'}
-              h={'100%'}
-            >
-              <Flex>
-                <div id="remoteMediaArea">
-                  {mediaElementAtoms.map((atom, index) => {
-                    return (
-                      <div
-                        data-publication-id={atom?.publicationId}
-                        key={index}
-                        className="video-container"
-                        style={{ position: 'relative' }}
-                      >
-                        {atom?.videoElement && atom?.audioElement ? (
-                          <>
-                            <div
-                              ref={(node) => {
-                                if (node && atom.videoElement) {
-                                  node.appendChild(atom.videoElement)
-                                }
-                              }}
-                            />
-                            <div
-                              ref={(node) => {
-                                if (node && atom.videoElement) {
-                                  node.appendChild(atom.audioElement)
-                                }
-                              }}
-                            />
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </Flex>
-            </Flex>
-            {MediaContrallerMemo}
-          </div>
-        </>
+      {isClosing && (
+        <Modal isOpen={isClosing} onClose={() => setIsClosing(false)}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>退室処理中です</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Text>しばらくお待ちください...</Text>
+              <Spinner />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
       )}
+      <Box position={'relative'}>
+        <Button
+          position={'absolute'}
+          right={'0'}
+          w={'150px'}
+          colorScheme="red"
+          mt={2}
+          onClick={onLeave}
+        >
+          退室する
+          <CloseIcon mx={2} w={3} />
+        </Button>
+      </Box>
+      <Flex
+        p={'1rem'}
+        flexWrap={'wrap'}
+        color="white"
+        direction={'row'}
+        h={'100%'}
+        alignItems={'center'}
+        justifyContent={'center'}
+        gap={'1%'}
+      >
+        <Box
+          overflow={'hidden'}
+          minW={'400px'}
+          minH={'350px'}
+          h={'40%'}
+          w={'30%'}
+        >
+          <video ref={localVideoRef} autoPlay playsInline muted />
+          <audio ref={localAudioRef} autoPlay playsInline muted />
+        </Box>
+        <div id="remoteMediaArea">
+          {Object.keys(userAreaDocuments).map((publicationId) => {
+            const remoteUserArea = userAreaDocuments[publicationId as any]
+            return (
+              <div
+                data-publication-id={publicationId}
+                key={publicationId}
+                className="video-container"
+                style={{
+                  position: 'relative',
+                  overflow: 'hidden',
+                  height: '40%',
+                  width: '30%',
+                  minWidth: '400px',
+                  minHeight: '350px',
+                }}
+              >
+                <div>
+                  {remoteUserArea && (
+                    <div
+                      ref={(node) => {
+                        if (node && remoteUserArea) {
+                          node.appendChild(remoteUserArea)
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </Flex>
+      <div>
+        <Box h={'fit-content'} w={'100%'} position={'fixed'} bottom={'0'}>
+          <ControlBar />
+        </Box>
+      </div>
     </>
   )
 }

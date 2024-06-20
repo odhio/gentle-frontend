@@ -1,16 +1,14 @@
 export const MediaAtomKeys = {
-  AUDIO_TRACK: 'audioTrackState',
-  VIDEO_TRACK: 'videoTrackState',
-  MEDIA_ELEMENTS_STATE: 'mediaEelementsState',
-  MEDIA_ID_STATE: 'mediaIdState',
-  SPEAKER_VALUE_STATE: 'speakerValueState',
-  SPEAKER_MUTE_STATE: 'speakerMuteState',
-  MIKE_ENABLED_STATE: 'mikeMuteState',
+  VOLUME_STATE: 'speakerValueState',
+  AUDIO_ENABLED_STATE: 'mikeMuteState',
   VIDEO_ENABLED_STATE: 'videoEnabledState',
+  PARTICIPANTS_STATE: 'participantsState',
 }
 
 export const LocalStreamAtomKeys = {
-  Local_Audio_Stream: 'localAudioStream',
-  Local_Video_Stream: 'localVideoStream',
-  Local_Data_Stream: 'localScreenStream',
+  LOCAL_AUDIO_STREAM: 'localAudioStream',
+  LOCAL_VIDEO_STREAM: 'localVideoStream',
+  TEXT_DARA_STREAM: 'textDataStream',
+  TEXT_DARA_STREAM_IDS: 'textDataStreanIds',
+  TEXT_DATA_SELECTOR: 'textDataSelector',
 }

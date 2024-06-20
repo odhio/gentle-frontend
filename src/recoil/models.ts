@@ -7,3 +7,9 @@ export interface MediaElementsType {
   videoEnabled: boolean
   state?: string
 }
+
+export interface ChatMessage {
+  memberId: string
+  memberName: string
+  message: string
+}

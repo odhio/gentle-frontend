@@ -1,33 +1,22 @@
-import { atom, atomFamily } from 'recoil'
+import { atom } from 'recoil'
 import { MediaAtomKeys } from '../recoil-keys'
-import { MediaElementsType } from '../models'
 
-export const audioTrackState = atom<MediaStreamTrack | null>({
-  key: MediaAtomKeys.AUDIO_TRACK,
-  default: null,
-})
-
-export const videoTrackState = atom<MediaStreamTrack | null>({
-  key: MediaAtomKeys.VIDEO_TRACK,
-  default: null,
-})
-
-export const mediaElementsState = atomFamily<MediaElementsType | null, string>({
-  key: MediaAtomKeys.MEDIA_ELEMENTS_STATE,
-  default: null,
-})
-
-export const mediaElementsIdState = atom<string[]>({
-  key: MediaAtomKeys.MEDIA_ID_STATE,
-  default: [],
-})
-
-export const mikeEnabledState = atom<boolean>({
-  key: MediaAtomKeys.MIKE_ENABLED_STATE,
+export const audioEnabledState = atom<boolean>({
+  key: MediaAtomKeys.AUDIO_ENABLED_STATE,
   default: true,
+})
+
+export const volumeState = atom<number>({
+  key: MediaAtomKeys.VOLUME_STATE,
+  default: 1,
 })
 
 export const videoEnabledState = atom<boolean>({
   key: MediaAtomKeys.VIDEO_ENABLED_STATE,
   default: true,
+})
+
+export const participantsState = atom<number>({
+  key: MediaAtomKeys.PARTICIPANTS_STATE,
+  default: 1,
 })

@@ -7,7 +7,7 @@ import SpeechRecognition, {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createMessage } from '@/features/room/api/message'
 import { useRecoilValue } from 'recoil'
-import { mikeEnabledState } from '@/recoil/atoms/media-atom'
+import { audioEnabledState } from '@/recoil/atoms/media-atom'
 
 interface Props {
   roomId: string | undefined
@@ -20,7 +20,7 @@ export const useAudioRecorder = ({
   userId,
   localAudioStream,
 }: Props) => {
-  const mikeEnabled = useRecoilValue(mikeEnabledState)
+  const mikeEnabled = useRecoilValue(audioEnabledState)
   const audioRecorder = useMemo(() => {
     if (!roomId || !userId || !localAudioStream) return
     return new AudioRecorder(roomId, userId, localAudioStream)

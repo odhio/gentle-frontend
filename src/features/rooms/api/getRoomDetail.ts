@@ -1,3 +1,4 @@
+'use client'
 import { client } from '@/lib/api'
 import useSWR, { SWRConfiguration } from 'swr'
 
@@ -6,7 +7,7 @@ type RoomMember = {
   user_uuid: string
   name: string
   summary: string
-};
+}
 
 type Response = {
   uuid: string
@@ -16,20 +17,20 @@ type Response = {
   roomMembers: RoomMember[]
   closedAt: string
   googleSchedule?: CalendarEvent | null
-};
+}
 
 type DateTimeInfo = {
-  dateTime: string;
-  timeZone: string;
-};
+  dateTime: string
+  timeZone: string
+}
 
 type CalendarEvent = {
-  end: DateTimeInfo;
-  start: DateTimeInfo;
-  summary: string;
-  location: string;
-  description: string;
-};
+  end: DateTimeInfo
+  start: DateTimeInfo
+  summary: string
+  location: string
+  description: string
+}
 
 const KEY = (roomUuid: string) => `/api/rooms/detail/${roomUuid}`
 
