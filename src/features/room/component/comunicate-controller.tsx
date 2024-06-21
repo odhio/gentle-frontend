@@ -1,5 +1,8 @@
 'use client'
-import { participantsState } from '@/recoil/atoms/media-atom'
+import {
+  chatAnnouncementState,
+  participantsState,
+} from '@/recoil/atoms/media-atom'
 import {
   Box,
   Button,
@@ -16,16 +19,20 @@ import {
   Tooltip,
   useDisclosure,
 } from '@chakra-ui/react'
-import { useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import { ChatSpace } from './chat/chat-space'
 
 export const ComunicateController = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [announce, setAnnounce] = useRecoilState(chatAnnouncementState)
   const participants = useRecoilValue(participantsState)
   const openDrawer = () => {
     if (isOpen) {
       onClose()
     } else {
+      if (announce) {
+        setAnnounce(false)
+      }
       onOpen()
     }
   }
@@ -44,7 +51,20 @@ export const ComunicateController = () => {
             flexDirection={'column'}
             onClick={openDrawer}
           >
-            <Image src="/assets/chat.png" alt="volume" w={'40px'} h={'40px'} />
+            <Image src="/assets/chat.png" alt="volume" w={'40px'} />
+            {announce && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 7,
+                  right: 10,
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: 'red',
+                }}
+              ></span>
+            )}
             <Text fontSize={'8px'}>チャット</Text>
           </Button>
         </Box>
@@ -72,7 +92,6 @@ export const ComunicateController = () => {
             src="/assets/users.png"
             alt="setting"
             w={'40px'}
-            h={'40px'}
             margin={'auto'}
           />
           <Text color={'white'} textAlign={'center'} fontSize={'8px'}>
@@ -90,12 +109,7 @@ export const ComunicateController = () => {
             flexDirection={'column'}
             gap={3}
           >
-            <Image
-              src="/assets/invitation.png"
-              alt="volume"
-              w={'40px'}
-              h={'40px'}
-            />
+            <Image src="/assets/invitation.png" alt="volume" w={'40px'} />
             <Text fontSize={'8px'}>招待通知</Text>
           </Button>
         </Tooltip>

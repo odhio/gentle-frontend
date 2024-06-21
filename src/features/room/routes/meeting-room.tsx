@@ -35,9 +35,10 @@ import { getToken } from '@/features/room/api/token'
 import { API_URL } from '@/config/env'
 import { useBeforeUnloadFunction } from '@/hooks/useBeforeUnloadFn'
 import { useAudioRecorder } from '@/hooks/audio/useAudioRecorder'
-import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import {
   audioEnabledState,
+  chatAnnouncementState,
   participantsState,
   videoEnabledState,
   volumeState,
@@ -70,12 +71,10 @@ export const MeetingRoom = () => {
   const audioEnabled = useRecoilValue(audioEnabledState)
   useEffect(() => {
     if (!videoTrack) return
-    console.log('videoTrack', videoTrack)
     videoEnabled ? (videoTrack.enabled = true) : (videoTrack.enabled = false)
   }, [videoEnabled, videoTrack])
   useEffect(() => {
     if (!audioTrack) return
-    console.log('audioTrack', audioTrack)
     audioEnabled ? (audioTrack.enabled = true) : (audioTrack.enabled = false)
   }, [audioEnabled, audioTrack])
 
@@ -116,6 +115,7 @@ export const MeetingRoom = () => {
 
   // チャット受信処理
   const { addText } = updateTextState()
+  const [announce, setAnnounce] = useRecoilState(chatAnnouncementState)
 
   // SkyWay
   const [room, setRoom] = useState<P2PRoom>()
@@ -124,50 +124,74 @@ export const MeetingRoom = () => {
   // ルーム退室 + タブ離脱処理
   const leaveBeacon = () => {
     if (me == null || room == null) return
-    if (room.members.length !== 1) return
-    const status = navigator.sendBeacon(`${API_URL}/api/rooms/close/${roomId}`)
-    videoStream?.getTracks().forEach((track) => {
-      track.stop()
-
-      console.log('videoTrack', videoTrack)
-    })
-    audioStream?.getTracks().forEach((track) => {
-      track.stop()
-    })
-    console.log('audioTrack', audioTrack)
-    console.log('videoTrack', videoTrack)
-
-    return status
+    if (room.members.length !== 1) {
+      return
+    } else {
+      const status = navigator.sendBeacon(
+        `${API_URL}/api/rooms/close/${roomId}`,
+      )
+      return status
+    }
   }
 
   useBeforeUnloadFunction(leaveBeacon)
+
   const onLeave = async () => {
-    if (me == null || room == null) return
-    try {
-      if (room.members.length == 1) {
-        if (roomId == undefined) return
-        setIsClosing(true)
+    let status = true // エラー発生時はfalseに切り替えtoastの表示を切り替え
+    let error_log = ''
+    if (me == null || room == null) {
+      console.error('SkyWayの設定にエラーが発生している可能性があります。')
+      status = false
+      return
+    }
+    setIsClosing(true)
+    if (room.members.length == 1) {
+      // ルームの最後のメンバーの場合
+      try {
         leaveBeacon()
         for (const pub of me.publications) await me.unpublish(pub.id)
         await me.leave()
 
+        videoStream?.getTracks().forEach((track) => {
+          track.stop()
+        })
+        audioStream?.getTracks().forEach((track) => {
+          track.stop()
+        })
+
         setRoom(undefined)
         setMe(null)
-      } else {
-        console.log('Failed to announce room leave')
+      } catch (e: any) {
+        status = false
+        error_log = e.message
+
+        console.error(e)
       }
-      for (const pub of me.publications) {
-        await me.unpublish(pub.id)
+    } else {
+      // 通常の退室処理
+      try {
+        for (const pub of me.publications) {
+          await me.unpublish(pub.id)
+        }
+        await me.leave()
+        setRoom(undefined)
+        setMe(null)
+      } catch (e: any) {
+        status = false
+        error_log = e.message
       }
-      await me.leave()
-      setRoom(undefined)
-      setMe(null)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setIsClosing(false)
-      router.push('/lounge')
     }
+    toast({
+      title: status ? '退室しました' : '退室処理時にエラーが発生しました',
+      status: status ? 'success' : 'error',
+      description: status
+        ? 'お疲れ様でした。記録はメンバーが全員退室したあとに確認することができます。'
+        : `${error_log}`,
+      duration: 5000,
+      isClosable: true,
+    })
+    setIsClosing(false)
+    router.push('/lounge')
   }
 
   const cleanup = () => {
@@ -284,7 +308,7 @@ export const MeetingRoom = () => {
         if (publication.publisher.id === me.id) {
           return
         }
-
+        setParticipantsState(room.members.length)
         const remoteMediaArea = document.getElementById('remoteMediaArea')
         const remoteUserArea = document.createElement('div') as HTMLDivElement
         const { stream } = await me.subscribe(publication.id)
@@ -312,8 +336,6 @@ export const MeetingRoom = () => {
               const source = ctx.createMediaElementSource(audioMedia)
               source.connect(gainNode)
               gainNode.connect(ctx.destination)
-              console.log('gain', gainNode.gain.value)
-
               if (remoteMediaArea != null && remoteUserArea != null) {
                 remoteUserArea.appendChild(audioMedia)
               }
@@ -323,13 +345,18 @@ export const MeetingRoom = () => {
             stream.onData.add((data) => {
               const chat = data as ChatMessage
               addText(chat['memberId'], chat['memberName'], chat['message'])
+              if (announce !== undefined && announce === false) {
+                setAnnounce(true)
+              }
             })
             break
         }
-        setUserAreaDocuments((prevAreas) => ({
-          ...prevAreas,
-          [publication.publisher.id]: remoteUserArea,
-        }))
+        if (remoteUserArea.childNodes.length !== 0) {
+          setUserAreaDocuments((prevAreas) => ({
+            ...prevAreas,
+            [publication.publisher.id]: remoteUserArea,
+          }))
+        }
       }
       room.publications.forEach(subscribeAndAttach)
       room.onStreamPublished.add((e) => subscribeAndAttach(e.publication))
@@ -344,13 +371,17 @@ export const MeetingRoom = () => {
       room.onMemberLeft.add((e) => {
         room.publications.forEach(async (publication) => {
           await me.unpublish(publication.id)
+          if (publication.publisher.id !== me.id) {
+            setInformation(`メンバーが退室しました.`)
+          }
         })
+        setParticipantsState(room.members.length)
+        // 退室したメンバーの表示エリアを削除
         const displayArea = document.querySelector(
           `[data-publication-id="${e.member.id}"]`,
         )
         if (displayArea !== undefined && displayArea !== null)
           displayArea.remove()
-        setInformation(`メンバーが退室しました.`)
       })
     } else {
       alert(
@@ -445,6 +476,7 @@ export const MeetingRoom = () => {
         alignItems={'center'}
         justifyContent={'center'}
         gap={'1%'}
+        id="remoteMediaArea"
       >
         <Box
           overflow={'hidden'}
@@ -456,38 +488,32 @@ export const MeetingRoom = () => {
           <video ref={localVideoRef} autoPlay playsInline muted />
           <audio ref={localAudioRef} autoPlay playsInline muted />
         </Box>
-        <div id="remoteMediaArea">
-          {Object.keys(userAreaDocuments).map((publicationId) => {
-            const remoteUserArea = userAreaDocuments[publicationId as any]
-            return (
-              <div
-                data-publication-id={publicationId}
-                key={publicationId}
-                className="video-container"
-                style={{
-                  position: 'relative',
-                  overflow: 'hidden',
-                  height: '40%',
-                  width: '30%',
-                  minWidth: '400px',
-                  minHeight: '350px',
-                }}
-              >
-                <div>
-                  {remoteUserArea && (
-                    <div
-                      ref={(node) => {
-                        if (node && remoteUserArea) {
-                          node.appendChild(remoteUserArea)
-                        }
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        {Object.keys(userAreaDocuments).map((publicationId) => {
+          const remoteUserArea = userAreaDocuments[publicationId as any]
+          return (
+            <div
+              data-publication-id={publicationId}
+              key={publicationId}
+              className="video-container"
+              style={{
+                overflow: 'hidden',
+                height: '40%',
+                width: '30%',
+                minWidth: '400px',
+                minHeight: '350px',
+                aspectRatio: '16/9',
+              }}
+              ref={
+                remoteUserArea &&
+                ((node) => {
+                  if (node && remoteUserArea) {
+                    node.appendChild(remoteUserArea)
+                  }
+                })
+              }
+            ></div>
+          )
+        })}
       </Flex>
       <div>
         <Box h={'fit-content'} w={'100%'} position={'fixed'} bottom={'0'}>

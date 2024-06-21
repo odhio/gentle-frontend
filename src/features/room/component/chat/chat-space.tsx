@@ -49,12 +49,16 @@ export const ChatSpace = () => {
         {chatTexts !== null && chatTexts.length > 0 ? (
           chatTexts.map((chat, i) =>
             chat?.memberId === me?.id ? (
-              <Text key={i} size="sm" color="blue.500">
-                [自分]：{chat?.message}
+              <Text key={i} size="sm" color="blue.50">
+                <span style={{ fontWeight: 'bold' }}>[自分]</span>
+                {chat?.message}
               </Text>
             ) : (
-              <Text size="sm" key={i} color="gray.700">
-                [{chat?.memberName ?? '名無し'}さん] ：{chat?.message}
+              <Text size="sm" key={i} color="white">
+                <span style={{ fontWeight: 'bold' }}>
+                  [{chat?.memberName ?? '名無し'}]
+                </span>
+                {chat?.message}
               </Text>
             ),
           )

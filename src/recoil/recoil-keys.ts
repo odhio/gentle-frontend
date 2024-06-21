@@ -2,6 +2,7 @@ export const MediaAtomKeys = {
   VOLUME_STATE: 'speakerValueState',
   AUDIO_ENABLED_STATE: 'mikeMuteState',
   VIDEO_ENABLED_STATE: 'videoEnabledState',
+  CHAT_ANNOUNCEMENT_STATE: 'chatAnnouncementState',
   PARTICIPANTS_STATE: 'participantsState',
 }
 

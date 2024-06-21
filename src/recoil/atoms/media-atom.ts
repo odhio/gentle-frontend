@@ -16,6 +16,11 @@ export const videoEnabledState = atom<boolean>({
   default: true,
 })
 
+export const chatAnnouncementState = atom<boolean>({
+  key: MediaAtomKeys.CHAT_ANNOUNCEMENT_STATE,
+  default: false,
+})
+
 export const participantsState = atom<number>({
   key: MediaAtomKeys.PARTICIPANTS_STATE,
   default: 1,

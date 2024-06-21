@@ -73,12 +73,7 @@ export const MediaController = () => {
                   display={'flex'}
                   flexDirection={'column'}
                 >
-                  <Image
-                    src="/assets/speaker-on.png"
-                    alt="volume"
-                    w={'40px'}
-                    h={'40px'}
-                  />
+                  <Image src="/assets/speaker-on.png" alt="volume" w={'40px'} />
                   <Text fontSize={'8px'}>音量</Text>
                 </Button>
               </PopoverTrigger>
@@ -149,7 +144,6 @@ export const MediaController = () => {
                     src="/assets/speaker-on.png"
                     alt="ミュート解除"
                     w={'40px'}
-                    h={'40px'}
                   />
                   <Text fontSize={'8px'}>ミュート解除</Text>
                 </>
@@ -159,7 +153,6 @@ export const MediaController = () => {
                     src="/assets/speaker-off.png"
                     alt="ミュート"
                     w={'40px'}
-                    h={'40px'}
                   />
                   <Text fontSize={'8px'}>ミュート</Text>
                 </>
@@ -186,7 +179,6 @@ export const MediaController = () => {
                     src="/assets/mike-off.png"
                     alt="マイクオフ"
                     w={'40px'}
-                    h={'40px'}
                   />
                   <Text fontSize={'8px'}>マイクオフ</Text>
                 </>
@@ -196,7 +188,6 @@ export const MediaController = () => {
                     src="/assets/mike-on.png"
                     alt="マイクオン"
                     w={'40px'}
-                    h={'35px'}
                   />
                   <Text fontSize={'8px'}>マイクオン</Text>
                 </>
@@ -220,14 +211,13 @@ export const MediaController = () => {
                     src="/assets/camera-off.png"
                     alt="カメラオフ"
                     w={'35px'}
-                    h={'35px'}
                   />
                   <Text fontSize={'8px'}>カメラオフ</Text>
                 </>
               ) : (
                 <>
                   <Image
-                    src="/assests/camera-on.png"
+                    src="/assets/camera-on.png"
                     alt="カメラオン"
                     ml={2}
                     w={5}

@@ -82,13 +82,14 @@ export const EmotionHeatMap = () => {
             h={'45px'}
             w={'100%'}
             mb={6}
-            rounded={'md'}
+            rounded={'sm'}
             position={'relative'}
           >
             <Heading
               as="h2"
               size="md"
               mb={4}
+              textAlign={'center'}
               color={'white'}
               position={'absolute'}
               top={'50%'}
